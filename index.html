@@ -5,206 +5,321 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventaris Lab IPA</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
-  <div class="max-w-5xl mx-auto p-6">
-    <h1 class="text-3xl font-bold text-center mb-8">📦 Inventaris Lab IPA</h1>
+  <!-- Notifikasi -->
+  <div id="notification" class="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg hidden fade-in z-50">
+    Berhasil disimpan
+  </div>
 
-    <!-- Login -->
-    <div id="login-section" class="space-y-4 max-w-sm mx-auto">
-      <input id="username" type="text" placeholder="Username" class="w-full px-4 py-2 border rounded" />
-      <input id="password" type="password" placeholder="Password" class="w-full px-4 py-2 border rounded" />
-      <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Login</button>
-      <p id="login-message" class="text-red-500 text-center"></p>
-    </div>
-
-    <!-- Dashboard -->
-    <div id="dashboard-section" class="hidden">
-      <div class="flex justify-between items-center mt-8">
-        <h2 class="text-xl font-semibold">📋 Daftar Inventaris</h2>
-        <button onclick="showForm()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">➕ Tambah</button>
+  <!-- Login Section -->
+  <div id="login-section" class="min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-md fade-in">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary bg-opacity-10 mb-4">
+          <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+          </svg>
+        </div>
+        <h1 class="text-3xl font-bold text-primary mb-2">Inventaris Lab IPA</h1>
+        <p class="text-gray-500">Silakan login untuk melanjutkan</p>
       </div>
-      <div class="overflow-x-auto mt-4">
-        <table class="min-w-full bg-white shadow rounded">
-          <thead class="bg-gray-200">
-            <tr>
-              <th class="p-2 text-left">Nama</th>
-              <th class="p-2 text-left">Jumlah</th>
-              <th class="p-2 text-left">Satuan</th>
-              <th class="p-2 text-left">Kondisi</th>
-              <th class="p-2 text-left">Lokasi</th>
-              <th class="p-2 text-left">Kategori</th>
-              <th class="p-2 text-center">Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="inventaris-table" class="text-sm"></tbody>
-        </table>
+      <div class="space-y-5">
+        <div class="relative">
+          <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+              </svg>
+            </div>
+            <input id="username" type="text" placeholder="Masukkan username" class="w-full pl-10 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
+          </div>
+        </div>
+        <div class="relative">
+          <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+              </svg>
+            </div>
+            <input id="password" type="password" placeholder="Masukkan password" class="w-full pl-10 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary focus:border-primary" />
+          </div>
+        </div>
+        <button id="login-button" onclick="login()" class="w-full bg-primary text-white py-3 rounded-lg hover:bg-primary-hover transition-all font-medium text-base mt-2">Masuk ke Sistem</button>
+        <p id="login-message" class="text-red-500 text-center text-sm mt-2"></p>
       </div>
     </div>
+  </div>
 
-    <!-- Modal -->
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-10">
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 id="form-title" class="text-lg font-semibold mb-4">Tambah Barang</h3>
-        <input type="text" id="nama" placeholder="Nama Barang" class="w-full mb-2 px-4 py-2 border rounded" />
-        <input type="number" id="jumlah" placeholder="Jumlah" class="w-full mb-2 px-4 py-2 border rounded" />
-        <input type="text" id="satuan" placeholder="Satuan" class="w-full mb-2 px-4 py-2 border rounded" />
-        <input type="text" id="kondisi" placeholder="Kondisi" class="w-full mb-2 px-4 py-2 border rounded" />
-        <input type="text" id="lokasi" placeholder="Lokasi" class="w-full mb-2 px-4 py-2 border rounded" />
-        <input type="text" id="kategori" placeholder="Kategori" class="w-full mb-2 px-4 py-2 border rounded" />
-        <input type="date" id="tanggal" class="w-full mb-2 px-4 py-2 border rounded" />
-        <textarea id="catatan" placeholder="Catatan" class="w-full mb-4 px-4 py-2 border rounded"></textarea>
+  <!-- Overlay untuk Mobile -->
+  <div id="sidebar-overlay" class="overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <h1 class="text-xl font-bold text-primary">📦 Inventaris Lab IPA</h1>
+      <p id="welcome-message" class="text-sm text-gray-600 mt-1"></p>
+    </div>
+    <div class="sidebar-menu">
+      <a href="#dashboard" class="sidebar-menu-item active" onclick="showSection('dashboard')">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+        </svg>
+        Dashboard
+      </a>
+      <a href="#inventaris" class="sidebar-menu-item" onclick="showSection('inventaris')">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        </svg>
+        Daftar Inventaris
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div id="main-content" class="hidden min-h-screen flex flex-col content-with-sidebar">
+    <!-- Navbar -->
+    <nav class="navbar sticky top-0 z-10 p-4">
+      <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center">
+          <button id="sidebar-toggle" class="sidebar-toggle p-2 mr-2 text-gray-600 hover:text-primary" onclick="toggleSidebar()">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+          </button>
+          <h1 id="page-title" class="text-xl font-bold text-primary">Dashboard</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button id="refresh-button" onclick="refreshData()" class="p-2 text-gray-600 hover:text-primary" title="Refresh Data">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            </svg>
+          </button>
+          <button onclick="logout()" class="flex items-center text-sm text-gray-600 hover:text-primary">
+            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+            Logout
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Content Container -->
+    <div class="max-w-7xl mx-auto p-4 md:p-6 flex-grow">
+      <!-- Dashboard Section -->
+      <section id="dashboard-section" class="space-y-6">
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 stats-grid">
+          <div class="stat-card p-4 rounded-lg">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-primary bg-opacity-10 mr-4">
+                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Total Barang</p>
+                <h3 id="total-barang" class="text-2xl font-bold">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card green p-4 rounded-lg">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-secondary bg-opacity-10 mr-4">
+                <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Total Jumlah</p>
+                <h3 id="total-jumlah" class="text-2xl font-bold">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card yellow p-4 rounded-lg">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-warning bg-opacity-10 mr-4">
+                <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Rusak Ringan</p>
+                <h3 id="kondisi-rusak-ringan" class="text-2xl font-bold">0</h3>
+              </div>
+            </div>
+          </div>
+          <div class="stat-card red p-4 rounded-lg">
+            <div class="flex items-center">
+              <div class="p-3 rounded-full bg-danger bg-opacity-10 mr-4">
+                <svg class="w-6 h-6 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Rusak Berat</p>
+                <h3 id="kondisi-rusak" class="text-2xl font-bold">0</h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts & Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <!-- Kondisi Chart -->
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <h3 class="font-semibold mb-4">Kondisi Barang</h3>
+            <div class="flex flex-wrap items-center justify-between mb-2 gap-2">
+              <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-secondary mr-2"></span>
+                <span class="text-sm">Baik: <span id="kondisi-baik">0</span></span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-warning mr-2"></span>
+                <span class="text-sm">Rusak Ringan: <span id="kondisi-rusak-ringan-chart">0</span></span>
+              </div>
+              <div class="flex items-center">
+                <span class="w-3 h-3 rounded-full bg-danger mr-2"></span>
+                <span class="text-sm">Rusak Berat: <span id="kondisi-rusak-chart">0</span></span>
+              </div>
+            </div>
+            <div class="h-64">
+              <canvas id="chart-kondisi"></canvas>
+            </div>
+          </div>
+
+          <!-- Kategori Chart -->
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <h3 class="font-semibold mb-4">Kategori Barang</h3>
+            <div class="h-64">
+              <canvas id="chart-kategori"></canvas>
+            </div>
+          </div>
+
+          <!-- Top Kategori -->
+          <div class="bg-white p-4 rounded-lg shadow-sm">
+            <h3 class="font-semibold mb-4">Top Kategori</h3>
+            <ul id="kategori-list" class="divide-y">
+              <!-- Diisi oleh JavaScript -->
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Inventaris Section -->
+      <section id="inventaris-section" class="hidden space-y-6">
+        <!-- Inventaris Table -->
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div class="p-4 flex flex-col md:flex-row justify-between items-start md:items-center border-b gap-4">
+            <h2 class="text-lg font-semibold">📋 Daftar Inventaris</h2>
+            <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 w-full md:w-auto">
+              <div class="relative w-full sm:w-auto">
+                <input id="search-input" type="text" placeholder="Cari..." class="w-full pl-8 pr-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+                <svg class="w-5 h-5 text-gray-400 absolute left-2 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <button onclick="filterTable()" class="absolute right-2 top-2.5 text-gray-400 hover:text-primary">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                  </svg>
+                </button>
+              </div>
+              <button onclick="showForm()" class="btn-success text-white px-4 py-2 rounded-md flex items-center justify-center">
+                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Tambah
+              </button>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="min-w-full">
+              <thead class="table-header">
+                <tr>
+                  <th class="p-3 text-left font-medium">Nama</th>
+                  <th class="p-3 text-left font-medium">Jumlah</th>
+                  <th class="p-3 text-left font-medium">Satuan</th>
+                  <th class="p-3 text-left font-medium">Kondisi</th>
+                  <th class="p-3 text-left font-medium">Lokasi</th>
+                  <th class="p-3 text-left font-medium">Kategori</th>
+                  <th class="p-3 text-center font-medium">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="inventaris-table" class="text-sm">
+                <!-- Diisi oleh JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-40">
+    <div class="modal-content bg-white rounded-lg p-6 w-full max-w-md mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 id="form-title" class="text-lg font-semibold">Tambah Barang</h3>
+        <button onclick="closeForm()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label for="nama" class="block text-sm font-medium text-gray-700 mb-1">Nama Barang</label>
+          <input type="text" id="nama" placeholder="Nama Barang" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div class="form-grid">
+          <div>
+            <label for="jumlah" class="block text-sm font-medium text-gray-700 mb-1">Jumlah</label>
+            <input type="number" id="jumlah" placeholder="Jumlah" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+          </div>
+          <div>
+            <label for="satuan" class="block text-sm font-medium text-gray-700 mb-1">Satuan</label>
+            <input type="text" id="satuan" placeholder="Satuan" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+          </div>
+        </div>
+        <div>
+          <label for="kondisi" class="block text-sm font-medium text-gray-700 mb-1">Kondisi</label>
+          <select id="kondisi" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary">
+            <option value="Baik">Baik</option>
+            <option value="Rusak Ringan">Rusak Ringan</option>
+            <option value="Rusak Berat">Rusak Berat</option>
+          </select>
+        </div>
+        <div>
+          <label for="lokasi" class="block text-sm font-medium text-gray-700 mb-1">Lokasi</label>
+          <input type="text" id="lokasi" placeholder="Lokasi" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="kategori" class="block text-sm font-medium text-gray-700 mb-1">Kategori</label>
+          <input type="text" id="kategori" placeholder="Kategori" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Masuk</label>
+          <input type="date" id="tanggal" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="catatan" class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
+          <textarea id="catatan" placeholder="Catatan" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary h-24 resize-none"></textarea>
+        </div>
         <input type="hidden" id="edit-id" />
-        <div class="flex justify-end space-x-2">
-          <button onclick="submitForm()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan</button>
-          <button onclick="closeForm()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Batal</button>
+        <div class="flex justify-end space-x-2 pt-2">
+          <button onclick="closeForm()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Batal</button>
+          <button id="save-button" onclick="submitForm()" class="btn-primary text-white px-4 py-2 rounded-md">Simpan</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script>
-    const URL = "https://script.google.com/macros/s/AKfycbwjK8w-TE-bh7UqYSQ2OohHUoI9G6kfMaSPBBsowjUYmyfvBNG7BHRSHX0Z5fbreUbXWg/exec";
-    let loginData = { username: "", password: "" };
-
-    function login() {
-      loginData.username = document.getElementById("username").value;
-      loginData.password = document.getElementById("password").value;
-      document.getElementById("login-message").textContent = "";
-
-      fetch(URL, {
-        method: "POST",
-        body: new URLSearchParams({
-          action: "getInventaris",
-          username: loginData.username,
-          password: loginData.password
-        })
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === "ok") {
-          document.getElementById("login-section").classList.add("hidden");
-          document.getElementById("dashboard-section").classList.remove("hidden");
-          renderTable(res.data);
-        } else {
-          document.getElementById("login-message").textContent = "Login gagal!";
-        }
-      });
-    }
-
-    function refreshData() {
-      fetch(URL, {
-        method: "POST",
-        body: new URLSearchParams({
-          action: "getInventaris",
-          username: loginData.username,
-          password: loginData.password
-        })
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === "ok") renderTable(res.data);
-        else alert("Gagal refresh data");
-      });
-    }
-
-    function renderTable(data) {
-      const tbody = document.getElementById("inventaris-table");
-      tbody.innerHTML = "";
-      data.forEach(item => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td class="p-2">${item["Nama Barang"]}</td>
-          <td class="p-2">${item["Jumlah"]}</td>
-          <td class="p-2">${item["Satuan"]}</td>
-          <td class="p-2">${item["Kondisi"]}</td>
-          <td class="p-2">${item["Lokasi"]}</td>
-          <td class="p-2">${item["Kategori"]}</td>
-          <td class="p-2 text-center">
-            <button onclick='editItem(${JSON.stringify(item)})' class="bg-yellow-400 text-white px-2 py-1 rounded">Edit</button>
-            <button onclick='deleteItem("${item.ID}")' class="bg-red-500 text-white px-2 py-1 rounded ml-2">Hapus</button>
-          </td>`;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function showForm() {
-      document.getElementById("modal").classList.remove("hidden");
-      document.getElementById("form-title").textContent = "Tambah Barang";
-      document.getElementById("edit-id").value = "";
-      document.querySelectorAll('#modal input:not([type=hidden]), #modal textarea').forEach(el => el.value = "");
-    }
-
-    function closeForm() {
-      document.getElementById("modal").classList.add("hidden");
-    }
-
-    function submitForm() {
-      const data = {
-        "Nama Barang": document.getElementById("nama").value,
-        "Jumlah": document.getElementById("jumlah").value,
-        "Satuan": document.getElementById("satuan").value,
-        "Kondisi": document.getElementById("kondisi").value,
-        "Lokasi": document.getElementById("lokasi").value,
-        "Kategori": document.getElementById("kategori").value,
-        "Tanggal Masuk": document.getElementById("tanggal").value,
-        "Catatan": document.getElementById("catatan").value
-      };
-      const id = document.getElementById("edit-id").value;
-      const action = id ? "updateBarang" : "addBarang";
-
-      fetch(URL, {
-        method: "POST",
-        body: new URLSearchParams({
-          action,
-          username: loginData.username,
-          password: loginData.password,
-          ...(id && { id }),
-          data: JSON.stringify(data)
-        })
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === "ok") {
-          closeForm();
-          refreshData();
-        } else {
-          alert("Gagal menyimpan data");
-        }
-      });
-    }
-
-    function editItem(item) {
-      showForm();
-      document.getElementById("form-title").textContent = "Edit Barang";
-      document.getElementById("edit-id").value = item.ID;
-      document.getElementById("nama").value = item["Nama Barang"];
-      document.getElementById("jumlah").value = item["Jumlah"];
-      document.getElementById("satuan").value = item["Satuan"];
-      document.getElementById("kondisi").value = item["Kondisi"];
-      document.getElementById("lokasi").value = item["Lokasi"];
-      document.getElementById("kategori").value = item["Kategori"];
-      document.getElementById("tanggal").value = item["Tanggal Masuk"];
-      document.getElementById("catatan").value = item["Catatan"];
-    }
-
-    function deleteItem(id) {
-      if (!confirm("Yakin ingin menghapus barang ini?")) return;
-      fetch(URL, {
-        method: "POST",
-        body: new URLSearchParams({
-          action: "deleteBarang",
-          username: loginData.username,
-          password: loginData.password,
-          id
-        })
-      })
-      .then(res => res.json())
-      .then(res => {
-        if (res.status === "ok") refreshData();
-        else alert("Gagal menghapus");
-      });
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
