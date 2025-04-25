@@ -2,96 +2,63 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventaris Lab IPA</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      margin: 0;
-      padding: 20px;
-    }
-    .container { max-width: 900px; margin: auto; }
-    h1 { text-align: center; color: #333; }
-
-    .hidden { display: none; }
-    table {
-      width: 100%; border-collapse: collapse; margin-top: 20px;
-    }
-    table, th, td {
-      border: 1px solid #ccc;
-    }
-    th, td {
-      padding: 8px; text-align: left;
-    }
-    th {
-      background-color: #eaeaea;
-    }
-
-    button {
-      padding: 10px 20px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
-    }
-    .modal-content {
-      background: white; padding: 20px; border-radius: 8px; width: 400px;
-    }
-
-    input, select, textarea {
-      width: 100%; padding: 8px; margin-top: 8px; margin-bottom: 16px;
-    }
-  </style>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="container">
-    <h1>Inventaris Lab IPA 🔬</h1>
+<body class="bg-gray-100 text-gray-800">
+  <div class="max-w-5xl mx-auto p-6">
+    <h1 class="text-3xl font-bold text-center mb-8">📦 Inventaris Lab IPA</h1>
 
     <!-- Login -->
-    <div id="login-section">
-      <h3>Login Admin</h3>
-      <input type="text" id="username" placeholder="Username">
-      <input type="password" id="password" placeholder="Password">
-      <button onclick="login()">Login</button>
-      <p id="login-message" style="color:red;"></p>
+    <div id="login-section" class="space-y-4 max-w-sm mx-auto">
+      <input id="username" type="text" placeholder="Username" class="w-full px-4 py-2 border rounded" />
+      <input id="password" type="password" placeholder="Password" class="w-full px-4 py-2 border rounded" />
+      <button onclick="login()" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Login</button>
+      <p id="login-message" class="text-red-500 text-center"></p>
     </div>
 
     <!-- Dashboard -->
     <div id="dashboard-section" class="hidden">
-      <button onclick="showForm()">➕ Tambah Barang</button>
-      <table id="inventaris-table">
-        <thead>
-          <tr>
-            <th>Nama</th><th>Jumlah</th><th>Satuan</th><th>Kondisi</th>
-            <th>Lokasi</th><th>Kategori</th><th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="flex justify-between items-center mt-8">
+        <h2 class="text-xl font-semibold">📋 Daftar Inventaris</h2>
+        <button onclick="showForm()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">➕ Tambah</button>
+      </div>
+      <div class="overflow-x-auto mt-4">
+        <table class="min-w-full bg-white shadow rounded">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="p-2 text-left">Nama</th>
+              <th class="p-2 text-left">Jumlah</th>
+              <th class="p-2 text-left">Satuan</th>
+              <th class="p-2 text-left">Kondisi</th>
+              <th class="p-2 text-left">Lokasi</th>
+              <th class="p-2 text-left">Kategori</th>
+              <th class="p-2 text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="inventaris-table" class="text-sm"></tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Modal Form -->
-    <div id="modal" class="modal hidden">
-      <div class="modal-content">
-        <h3 id="form-title">Tambah Barang</h3>
-        <input type="text" id="nama" placeholder="Nama Barang">
-        <input type="number" id="jumlah" placeholder="Jumlah">
-        <input type="text" id="satuan" placeholder="Satuan">
-        <input type="text" id="kondisi" placeholder="Kondisi">
-        <input type="text" id="lokasi" placeholder="Lokasi">
-        <input type="text" id="kategori" placeholder="Kategori">
-        <input type="date" id="tanggal">
-        <textarea id="catatan" placeholder="Catatan"></textarea>
-        <input type="hidden" id="edit-id">
-        <button onclick="submitForm()">Simpan</button>
-        <button onclick="closeForm()" style="background:#e11d48;margin-left:10px;">Batal</button>
+    <!-- Modal -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-10">
+      <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h3 id="form-title" class="text-lg font-semibold mb-4">Tambah Barang</h3>
+        <input type="text" id="nama" placeholder="Nama Barang" class="w-full mb-2 px-4 py-2 border rounded" />
+        <input type="number" id="jumlah" placeholder="Jumlah" class="w-full mb-2 px-4 py-2 border rounded" />
+        <input type="text" id="satuan" placeholder="Satuan" class="w-full mb-2 px-4 py-2 border rounded" />
+        <input type="text" id="kondisi" placeholder="Kondisi" class="w-full mb-2 px-4 py-2 border rounded" />
+        <input type="text" id="lokasi" placeholder="Lokasi" class="w-full mb-2 px-4 py-2 border rounded" />
+        <input type="text" id="kategori" placeholder="Kategori" class="w-full mb-2 px-4 py-2 border rounded" />
+        <input type="date" id="tanggal" class="w-full mb-2 px-4 py-2 border rounded" />
+        <textarea id="catatan" placeholder="Catatan" class="w-full mb-4 px-4 py-2 border rounded"></textarea>
+        <input type="hidden" id="edit-id" />
+        <div class="flex justify-end space-x-2">
+          <button onclick="submitForm()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Simpan</button>
+          <button onclick="closeForm()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">Batal</button>
+        </div>
       </div>
     </div>
   </div>
@@ -103,6 +70,7 @@
     function login() {
       loginData.username = document.getElementById("username").value;
       loginData.password = document.getElementById("password").value;
+      document.getElementById("login-message").textContent = "";
 
       fetch(URL, {
         method: "POST",
@@ -119,36 +87,36 @@
           document.getElementById("dashboard-section").classList.remove("hidden");
           renderTable(res.data);
         } else {
-          document.getElementById("login-message").innerText = "Login gagal!";
+          document.getElementById("login-message").textContent = "Login gagal!";
         }
       });
     }
 
     function renderTable(data) {
-      const tbody = document.querySelector("#inventaris-table tbody");
+      const tbody = document.getElementById("inventaris-table");
       tbody.innerHTML = "";
       data.forEach(item => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${item["Nama Barang"]}</td>
-          <td>${item["Jumlah"]}</td>
-          <td>${item["Satuan"]}</td>
-          <td>${item["Kondisi"]}</td>
-          <td>${item["Lokasi"]}</td>
-          <td>${item["Kategori"]}</td>
-          <td>
-            <button onclick='editItem(${JSON.stringify(item)})'>Edit</button>
-            <button onclick='deleteItem("${item.ID}")' style="background:#f87171;margin-left:5px;">Hapus</button>
+          <td class="p-2">${item["Nama Barang"]}</td>
+          <td class="p-2">${item["Jumlah"]}</td>
+          <td class="p-2">${item["Satuan"]}</td>
+          <td class="p-2">${item["Kondisi"]}</td>
+          <td class="p-2">${item["Lokasi"]}</td>
+          <td class="p-2">${item["Kategori"]}</td>
+          <td class="p-2 text-center">
+            <button onclick='editItem(${JSON.stringify(item)})' class="bg-yellow-400 text-white px-2 py-1 rounded">Edit</button>
+            <button onclick='deleteItem("${item.ID}")' class="bg-red-500 text-white px-2 py-1 rounded ml-2">Hapus</button>
           </td>`;
         tbody.appendChild(tr);
       });
     }
 
     function showForm() {
-      document.getElementById("form-title").innerText = "Tambah Barang";
       document.getElementById("modal").classList.remove("hidden");
+      document.getElementById("form-title").textContent = "Tambah Barang";
       document.getElementById("edit-id").value = "";
-      document.querySelectorAll('#modal input, #modal textarea').forEach(i => i.value = "");
+      document.querySelectorAll('#modal input:not([type=hidden]), #modal textarea').forEach(el => el.value = "");
     }
 
     function closeForm() {
@@ -168,29 +136,31 @@
       };
       const id = document.getElementById("edit-id").value;
       const action = id ? "updateBarang" : "addBarang";
-      const params = {
-        action, username: loginData.username, password: loginData.password,
-        ...(id ? { id } : {}), data: JSON.stringify(data)
-      };
 
       fetch(URL, {
         method: "POST",
-        body: new URLSearchParams(params)
+        body: new URLSearchParams({
+          action,
+          username: loginData.username,
+          password: loginData.password,
+          ...(id && { id }),
+          data: JSON.stringify(data)
+        })
       })
       .then(res => res.json())
       .then(res => {
         if (res.status === "ok") {
           closeForm();
-          login(); // refresh data
+          login(); // reload data
         } else {
-          alert("Gagal simpan data!");
+          alert("Gagal menyimpan data");
         }
       });
     }
 
     function editItem(item) {
-      document.getElementById("form-title").innerText = "Edit Barang";
-      document.getElementById("modal").classList.remove("hidden");
+      showForm();
+      document.getElementById("form-title").textContent = "Edit Barang";
       document.getElementById("edit-id").value = item.ID;
       document.getElementById("nama").value = item["Nama Barang"];
       document.getElementById("jumlah").value = item["Jumlah"];
@@ -203,20 +173,20 @@
     }
 
     function deleteItem(id) {
-      if (!confirm("Yakin hapus barang ini?")) return;
+      if (!confirm("Yakin ingin menghapus barang ini?")) return;
       fetch(URL, {
         method: "POST",
         body: new URLSearchParams({
           action: "deleteBarang",
-          id,
           username: loginData.username,
-          password: loginData.password
+          password: loginData.password,
+          id
         })
       })
       .then(res => res.json())
       .then(res => {
         if (res.status === "ok") login();
-        else alert("Gagal hapus barang!");
+        else alert("Gagal menghapus");
       });
     }
   </script>
