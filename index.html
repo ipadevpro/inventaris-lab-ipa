@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Inventaris Lab IPA</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      margin: 0;
+      padding: 20px;
+    }
+    .container { max-width: 900px; margin: auto; }
+    h1 { text-align: center; color: #333; }
+
+    .hidden { display: none; }
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 8px; text-align: left;
+    }
+    th {
+      background-color: #eaeaea;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .modal {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;
+    }
+    .modal-content {
+      background: white; padding: 20px; border-radius: 8px; width: 400px;
+    }
+
+    input, select, textarea {
+      width: 100%; padding: 8px; margin-top: 8px; margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Inventaris Lab IPA 🔬</h1>
+
+    <!-- Login -->
+    <div id="login-section">
+      <h3>Login Admin</h3>
+      <input type="text" id="username" placeholder="Username">
+      <input type="password" id="password" placeholder="Password">
+      <button onclick="login()">Login</button>
+      <p id="login-message" style="color:red;"></p>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard-section" class="hidden">
+      <button onclick="showForm()">➕ Tambah Barang</button>
+      <table id="inventaris-table">
+        <thead>
+          <tr>
+            <th>Nama</th><th>Jumlah</th><th>Satuan</th><th>Kondisi</th>
+            <th>Lokasi</th><th>Kategori</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- Modal Form -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-content">
+        <h3 id="form-title">Tambah Barang</h3>
+        <input type="text" id="nama" placeholder="Nama Barang">
+        <input type="number" id="jumlah" placeholder="Jumlah">
+        <input type="text" id="satuan" placeholder="Satuan">
+        <input type="text" id="kondisi" placeholder="Kondisi">
+        <input type="text" id="lokasi" placeholder="Lokasi">
+        <input type="text" id="kategori" placeholder="Kategori">
+        <input type="date" id="tanggal">
+        <textarea id="catatan" placeholder="Catatan"></textarea>
+        <input type="hidden" id="edit-id">
+        <button onclick="submitForm()">Simpan</button>
+        <button onclick="closeForm()" style="background:#e11d48;margin-left:10px;">Batal</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const URL = "https://script.google.com/macros/s/AKfycbwjK8w-TE-bh7UqYSQ2OohHUoI9G6kfMaSPBBsowjUYmyfvBNG7BHRSHX0Z5fbreUbXWg/exec";
+    let loginData = { username: "", password: "" };
+
+    function login() {
+      loginData.username = document.getElementById("username").value;
+      loginData.password = document.getElementById("password").value;
+
+      fetch(URL, {
+        method: "POST",
+        body: new URLSearchParams({
+          action: "getInventaris",
+          username: loginData.username,
+          password: loginData.password
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "ok") {
+          document.getElementById("login-section").classList.add("hidden");
+          document.getElementById("dashboard-section").classList.remove("hidden");
+          renderTable(res.data);
+        } else {
+          document.getElementById("login-message").innerText = "Login gagal!";
+        }
+      });
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector("#inventaris-table tbody");
+      tbody.innerHTML = "";
+      data.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${item["Nama Barang"]}</td>
+          <td>${item["Jumlah"]}</td>
+          <td>${item["Satuan"]}</td>
+          <td>${item["Kondisi"]}</td>
+          <td>${item["Lokasi"]}</td>
+          <td>${item["Kategori"]}</td>
+          <td>
+            <button onclick='editItem(${JSON.stringify(item)})'>Edit</button>
+            <button onclick='deleteItem("${item.ID}")' style="background:#f87171;margin-left:5px;">Hapus</button>
+          </td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function showForm() {
+      document.getElementById("form-title").innerText = "Tambah Barang";
+      document.getElementById("modal").classList.remove("hidden");
+      document.getElementById("edit-id").value = "";
+      document.querySelectorAll('#modal input, #modal textarea').forEach(i => i.value = "");
+    }
+
+    function closeForm() {
+      document.getElementById("modal").classList.add("hidden");
+    }
+
+    function submitForm() {
+      const data = {
+        "Nama Barang": document.getElementById("nama").value,
+        "Jumlah": document.getElementById("jumlah").value,
+        "Satuan": document.getElementById("satuan").value,
+        "Kondisi": document.getElementById("kondisi").value,
+        "Lokasi": document.getElementById("lokasi").value,
+        "Kategori": document.getElementById("kategori").value,
+        "Tanggal Masuk": document.getElementById("tanggal").value,
+        "Catatan": document.getElementById("catatan").value
+      };
+      const id = document.getElementById("edit-id").value;
+      const action = id ? "updateBarang" : "addBarang";
+      const params = {
+        action, username: loginData.username, password: loginData.password,
+        ...(id ? { id } : {}), data: JSON.stringify(data)
+      };
+
+      fetch(URL, {
+        method: "POST",
+        body: new URLSearchParams(params)
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "ok") {
+          closeForm();
+          login(); // refresh data
+        } else {
+          alert("Gagal simpan data!");
+        }
+      });
+    }
+
+    function editItem(item) {
+      document.getElementById("form-title").innerText = "Edit Barang";
+      document.getElementById("modal").classList.remove("hidden");
+      document.getElementById("edit-id").value = item.ID;
+      document.getElementById("nama").value = item["Nama Barang"];
+      document.getElementById("jumlah").value = item["Jumlah"];
+      document.getElementById("satuan").value = item["Satuan"];
+      document.getElementById("kondisi").value = item["Kondisi"];
+      document.getElementById("lokasi").value = item["Lokasi"];
+      document.getElementById("kategori").value = item["Kategori"];
+      document.getElementById("tanggal").value = item["Tanggal Masuk"];
+      document.getElementById("catatan").value = item["Catatan"];
+    }
+
+    function deleteItem(id) {
+      if (!confirm("Yakin hapus barang ini?")) return;
+      fetch(URL, {
+        method: "POST",
+        body: new URLSearchParams({
+          action: "deleteBarang",
+          id,
+          username: loginData.username,
+          password: loginData.password
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "ok") login();
+        else alert("Gagal hapus barang!");
+      });
+    }
+  </script>
+</body>
+</html>
