@@ -92,6 +92,22 @@
       });
     }
 
+    function refreshData() {
+      fetch(URL, {
+        method: "POST",
+        body: new URLSearchParams({
+          action: "getInventaris",
+          username: loginData.username,
+          password: loginData.password
+        })
+      })
+      .then(res => res.json())
+      .then(res => {
+        if (res.status === "ok") renderTable(res.data);
+        else alert("Gagal refresh data");
+      });
+    }
+
     function renderTable(data) {
       const tbody = document.getElementById("inventaris-table");
       tbody.innerHTML = "";
@@ -151,7 +167,7 @@
       .then(res => {
         if (res.status === "ok") {
           closeForm();
-          login(); // reload data
+          refreshData();
         } else {
           alert("Gagal menyimpan data");
         }
@@ -185,7 +201,7 @@
       })
       .then(res => res.json())
       .then(res => {
-        if (res.status === "ok") login();
+        if (res.status === "ok") refreshData();
         else alert("Gagal menghapus");
       });
     }
