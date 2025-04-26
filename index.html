@@ -78,6 +78,18 @@
         </svg>
         Daftar Inventaris
       </a>
+      <a href="#jurnal" class="sidebar-menu-item" onclick="showSection('jurnal')">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        </svg>
+        Jurnal Lab
+      </a>
+      <a href="#jadwal" class="sidebar-menu-item" onclick="showSection('jadwal')">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        Jadwal Lab
+      </a>
     </div>
   </div>
 
@@ -258,6 +270,59 @@
           </div>
         </div>
       </section>
+
+      <!-- Jurnal Section -->
+      <section id="jurnal-section" class="hidden p-4 space-y-4">
+        <h2 class="text-lg font-semibold">📝 Jurnal Pelaksanaan Lab</h2>
+        <div class="flex justify-between items-center mb-4">
+          <p class="text-sm text-gray-600">Riwayat penggunaan laboratorium dan jurnal praktikum</p>
+          <button onclick="showJurnalForm()" class="btn-primary text-white px-4 py-2 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+            Isi Jurnal
+          </button>
+        </div>
+        <div id="jurnal-list" class="space-y-2"></div>
+      </section>
+
+      <!-- Jadwal Section -->
+      <section id="jadwal-section" class="hidden p-4 space-y-4">
+        <h2 class="text-lg font-semibold">📆 Jadwal Penggunaan Lab</h2>
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <p class="text-sm text-gray-600">Jadwal menampilkan minggu <span id="jenis-minggu" class="font-medium"></span> untuk mingggu ini</p>
+            <p class="text-sm text-gray-600">Drag and drop untuk mengatur urutan jadwal</p>
+          </div>
+          <button onclick="showJadwalForm()" class="btn-success text-white px-4 py-2 rounded-md flex items-center justify-center">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+            </svg>
+            Tambah Jadwal
+          </button>
+        </div>
+        <div class="overflow-auto bg-white rounded-lg shadow-sm p-4">
+          <table class="min-w-full text-sm table-fixed border">
+            <thead class="bg-gray-100">
+              <tr>
+                <th class="px-4 py-2">Hari</th>
+                <th class="px-4 py-2">Jam</th>
+                <th class="px-4 py-2">Kelas</th>
+                <th class="px-4 py-2">Guru</th>
+                <th class="px-4 py-2">Minggu</th>
+                <th class="px-4 py-2 w-1/6">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="jadwal-table" class="bg-white"></tbody>
+          </table>
+        </div>
+        <button onclick="saveJadwal()" class="btn-primary text-white px-4 py-2 rounded-md flex items-center justify-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+          </svg>
+          Simpan Jadwal
+        </button>
+      </section>
     </div>
   </div>
 
@@ -315,6 +380,46 @@
         <div class="flex justify-end space-x-2 pt-2">
           <button onclick="closeForm()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Batal</button>
           <button id="save-button" onclick="submitForm()" class="btn-primary text-white px-4 py-2 rounded-md">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Jurnal -->
+  <div id="jurnal-modal" class="fixed inset-0 bg-black bg-opacity-40 hidden items-center justify-center z-40">
+    <div class="modal-content bg-white rounded-lg p-6 w-full max-w-md mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">Isi Jurnal Pelaksanaan Lab</h3>
+        <button onclick="closeJurnalForm()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label for="jurnal-tanggal" class="block text-sm font-medium text-gray-700 mb-1">Tanggal Praktikum</label>
+          <input type="date" id="jurnal-tanggal" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="jurnal-materi" class="block text-sm font-medium text-gray-700 mb-1">Materi Praktikum</label>
+          <input type="text" id="jurnal-materi" placeholder="Materi Praktikum" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="jurnal-kelas" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+          <input type="text" id="jurnal-kelas" placeholder="Kelas" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="jurnal-alat" class="block text-sm font-medium text-gray-700 mb-1">Alat yang Digunakan</label>
+          <input type="text" id="jurnal-alat" placeholder="Alat yang Digunakan" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="jurnal-catatan" class="block text-sm font-medium text-gray-700 mb-1">Catatan</label>
+          <textarea id="jurnal-catatan" placeholder="Catatan" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary h-24 resize-none"></textarea>
+        </div>
+        <div class="flex justify-end space-x-2 pt-2">
+          <button onclick="closeJurnalForm()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Batal</button>
+          <button id="jurnal-save-button" onclick="submitJurnalForm()" class="btn-primary text-white px-4 py-2 rounded-md">Simpan</button>
         </div>
       </div>
     </div>

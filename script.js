@@ -1,9 +1,48 @@
 // Script untuk Inventaris Lab IPA
-const URL = "https://script.google.com/macros/s/AKfycbwjK8w-TE-bh7UqYSQ2OohHUoI9G6kfMaSPBBsowjUYmyfvBNG7BHRSHX0Z5fbreUbXWg/exec";
+let URL = "https://script.google.com/macros/s/AKfycbwjK8w-TE-bh7UqYSQ2OohHUoI9G6kfMaSPBBsowjUYmyfvBNG7BHRSHX0Z5fbreUbXWg/exec";
 let loginData = { username: "", password: "" };
 let inventarisData = [];
 let chartInstances = {};
 let currentSection = 'dashboard';
+
+// Fungsi untuk memperbarui URL API
+function updateApiUrl() {
+  const newUrl = prompt("Masukkan URL API terbaru dari deployment Google Apps Script:", URL);
+  if (newUrl && newUrl !== URL && newUrl.startsWith("https://script.google.com/macros/s/")) {
+    localStorage.setItem("apiUrl", newUrl);
+    URL = newUrl; // Update URL langsung
+    alert("URL API berhasil diperbarui ke: " + newUrl);
+  } else if (newUrl) {
+    alert("URL tidak valid. Harap gunakan URL dari deployment Google Apps Script.");
+  }
+}
+
+// Cek apakah ada URL tersimpan di localStorage
+document.addEventListener('DOMContentLoaded', function() {
+  const savedUrl = localStorage.getItem("apiUrl");
+  if (savedUrl && savedUrl.startsWith("https://script.google.com/macros/s/")) {
+    console.log("Menggunakan URL API dari localStorage:", savedUrl);
+    URL = savedUrl; // Update variable URL global
+  }
+  
+  // Tambahkan tombol update URL di navbar
+  const navbar = document.querySelector('.navbar .flex.items-center.space-x-4');
+  if (navbar) {
+    const updateUrlButton = document.createElement("button");
+    updateUrlButton.className = "p-2 text-gray-600 hover:text-primary";
+    updateUrlButton.title = "Update API URL";
+    updateUrlButton.setAttribute("onclick", "updateApiUrl()");
+    updateUrlButton.innerHTML = `
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+      </svg>
+    `;
+    navbar.insertBefore(updateUrlButton, navbar.firstChild);
+  }
+  
+  document.getElementById('sidebar').classList.add('hidden');
+});
 
 // Sembunyikan sidebar saat halaman dimuat
 document.addEventListener('DOMContentLoaded', function() {
@@ -30,12 +69,18 @@ function showSection(section) {
   // Hide all sections
   document.getElementById('dashboard-section').classList.add('hidden');
   document.getElementById('inventaris-section').classList.add('hidden');
+  document.getElementById('jurnal-section').classList.add('hidden');
+  document.getElementById('jadwal-section').classList.add('hidden');
   
   // Show selected section
   document.getElementById(`${section}-section`).classList.remove('hidden');
   
   // Update page title
-  document.getElementById('page-title').textContent = section === 'dashboard' ? 'Dashboard' : 'Daftar Inventaris';
+  let title = 'Dashboard';
+  if (section === 'inventaris') title = 'Daftar Inventaris';
+  if (section === 'jurnal') title = 'Jurnal Pelaksanaan Lab';
+  if (section === 'jadwal') title = 'Jadwal Penggunaan Lab';
+  document.getElementById('page-title').textContent = title;
   
   // Close sidebar on mobile
   if (window.innerWidth < 1024) {
@@ -43,6 +88,15 @@ function showSection(section) {
   }
   
   currentSection = section;
+  
+  // Load section specific data
+  if (section === 'dashboard') {
+    renderDashboardStats(inventarisData);
+    renderCharts(inventarisData);
+  }
+  if (section === 'inventaris') renderTable(inventarisData);
+  if (section === 'jurnal') loadJurnal();
+  if (section === 'jadwal') loadJadwal();
 }
 
 // Fungsi untuk login
@@ -500,3 +554,523 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// Jurnal and Jadwal functions
+function loadJurnal() {
+  fetch(URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "getJurnal",
+      username: loginData.username,
+      password: loginData.password
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    const list = document.getElementById("jurnal-list");
+    list.innerHTML = "";
+    
+    if (res.status !== "ok" || !res.data || res.data.length === 0) {
+      list.innerHTML = '<div class="p-4 text-center text-gray-500">Belum ada data jurnal</div>';
+      return;
+    }
+    
+    // Urutkan data berdasarkan tanggal terbaru
+    res.data.sort((a, b) => {
+      const dateA = new Date(a.Tanggal);
+      const dateB = new Date(b.Tanggal);
+      return dateB - dateA; // Descending order (newest first)
+    });
+    
+    res.data.forEach((item, index) => {
+      // Format tanggal menjadi lebih mudah dibaca
+      const formattedDate = formatDate(item.Tanggal);
+      
+      const div = document.createElement("div");
+      div.className = "p-4 border rounded-lg bg-white shadow-sm hover:shadow-md transition-all mb-3";
+      div.innerHTML = `
+        <div class="flex justify-between items-start mb-2">
+          <span class="font-medium text-primary">${formattedDate || '-'}</span>
+          <div>
+            <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${item.Kelas || '-'}</span>
+          </div>
+        </div>
+        <div class="font-medium mb-2">${item.Materi || '-'}</div>
+        <div class="text-sm text-gray-700 mb-2">
+          <span class="font-medium">Guru:</span> ${item.Guru || '-'}
+        </div>
+        <div class="text-sm text-gray-700 mb-2">
+          <span class="font-medium">Alat yang digunakan:</span> ${item["Alat Digunakan"] || '-'}
+        </div>
+        <div class="text-sm text-gray-600 italic">${item.Catatan || '-'}</div>
+      `;
+      list.appendChild(div);
+    });
+  })
+  .catch(error => {
+    console.error("Error loading jurnal:", error);
+    document.getElementById("jurnal-list").innerHTML = 
+      '<div class="p-4 text-center text-red-500">Gagal memuat data jurnal</div>';
+  });
+}
+
+// Helper untuk format tanggal lebih bagus
+function formatDate(dateString) {
+  if (!dateString) return '-';
+  
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+    return date.toLocaleDateString('id-ID', options);
+  } catch (e) {
+    return dateString;
+  }
+}
+
+function showJurnalForm() {
+  document.getElementById("jurnal-modal").classList.remove("hidden");
+  document.getElementById("jurnal-modal").classList.add("flex");
+  
+  // Isi dengan tanggal hari ini secara default
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById("jurnal-tanggal").value = today;
+  
+  document.getElementById("jurnal-materi").value = "";
+  document.getElementById("jurnal-kelas").value = "";
+  document.getElementById("jurnal-alat").value = "";
+  document.getElementById("jurnal-catatan").value = "";
+}
+
+function closeJurnalForm() {
+  document.getElementById("jurnal-modal").classList.add("hidden");
+  document.getElementById("jurnal-modal").classList.remove("flex");
+}
+
+function submitJurnalForm() {
+  // Validasi form
+  const materi = document.getElementById("jurnal-materi").value;
+  const kelas = document.getElementById("jurnal-kelas").value;
+  
+  if (!materi || !kelas) {
+    alert("Materi praktikum dan kelas harus diisi!");
+    return;
+  }
+  
+  // Tampilkan loading
+  document.getElementById("jurnal-save-button").disabled = true;
+  document.getElementById("jurnal-save-button").innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...';
+  
+  const alat = document.getElementById("jurnal-alat").value;
+  const catatan = document.getElementById("jurnal-catatan").value;
+  const tanggal = document.getElementById("jurnal-tanggal").value || new Date().toISOString().split('T')[0];
+
+  // Pastikan data dalam format yang benar dan lengkap sesuai yang diharapkan backend
+  const jurnalData = { 
+    Tanggal: tanggal, 
+    Kelas: kelas, 
+    Materi: materi, 
+    "Alat Digunakan": alat || "-", 
+    Catatan: catatan || "-" 
+  };
+
+  console.log("Mengirim data jurnal:", jurnalData); // Debugging
+
+  fetch(URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "addJurnal",
+      username: loginData.username,
+      password: loginData.password,
+      data: JSON.stringify(jurnalData)
+    })
+  })
+  .then(res => {
+    console.log("Status response:", res.status); // Debugging
+    return res.json();
+  })
+  .then(res => {
+    // Reset tombol simpan
+    document.getElementById("jurnal-save-button").disabled = false;
+    document.getElementById("jurnal-save-button").innerHTML = 'Simpan';
+    
+    console.log("Response dari server:", res); // Debugging
+    
+    if (res.status === "ok") {
+      closeJurnalForm();
+      loadJurnal();
+      showNotification("Jurnal berhasil ditambahkan");
+    } else {
+      alert("Gagal menambahkan jurnal: " + (res.message || "Terjadi kesalahan"));
+    }
+  })
+  .catch(error => {
+    console.error("Error adding jurnal (detail):", error);
+    document.getElementById("jurnal-save-button").disabled = false;
+    document.getElementById("jurnal-save-button").innerHTML = 'Simpan';
+    alert("Terjadi kesalahan saat menambahkan jurnal");
+  });
+}
+
+function loadJadwal() {
+  fetch(URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "getJadwal",
+      username: loginData.username,
+      password: loginData.password
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    const tbody = document.getElementById("jadwal-table");
+    tbody.innerHTML = "";
+    
+    // Tampilkan jenis minggu (genap/ganjil)
+    const today = new Date();
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    const weekNumber = Math.ceil((((today - startOfYear) / 86400000) + startOfYear.getDay() + 1) / 7);
+    const isEvenWeek = weekNumber % 2 === 0;
+    const mingguText = isEvenWeek ? "Genap" : "Ganjil";
+    
+    document.getElementById("jenis-minggu").textContent = mingguText;
+    document.getElementById("jenis-minggu").className = 
+      isEvenWeek ? "font-medium text-blue-600" : "font-medium text-green-600";
+    
+    if (res.status !== "ok" || !res.data || res.data.length === 0) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = '<td colspan="6" class="px-4 py-2 text-center text-gray-500">Belum ada jadwal</td>';
+      tbody.appendChild(tr);
+      return;
+    }
+    
+    res.data.forEach((item, index) => {
+      const tr = document.createElement("tr");
+      tr.draggable = true;
+      tr.dataset.index = index;
+      tr.className = index % 2 === 0 ? "bg-white" : "bg-gray-50";
+      tr.innerHTML = `
+        <td class="px-4 py-2 border">${item.Hari || '-'}</td>
+        <td class="px-4 py-2 border">${item.Jam || '-'}</td>
+        <td class="px-4 py-2 border">${item.Kelas || '-'}</td>
+        <td class="px-4 py-2 border">${item.Guru || '-'}</td>
+        <td class="px-4 py-2 border">${item.Minggu || '-'}</td>
+        <td class="px-4 py-2 border text-center">
+          <button onclick="editJadwal(${index})" class="text-blue-500 hover:text-blue-700 mr-2">
+            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+            </svg>
+          </button>
+          <button onclick="deleteJadwal(${index})" class="text-red-500 hover:text-red-700">
+            <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+          </button>
+        </td>`;
+      addDragEvents(tr);
+      tbody.appendChild(tr);
+    });
+  })
+  .catch(error => {
+    console.error("Error loading jadwal:", error);
+    document.getElementById("jadwal-table").innerHTML = 
+      '<tr><td colspan="6" class="px-4 py-2 text-center text-red-500">Gagal memuat jadwal</td></tr>';
+  });
+}
+
+function addDragEvents(row) {
+  row.addEventListener("dragstart", (e) => {
+    e.dataTransfer.setData("text/plain", row.dataset.index);
+    row.classList.add("opacity-50");
+  });
+
+  row.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    row.classList.add("bg-blue-50");
+  });
+
+  row.addEventListener("dragleave", () => {
+    row.classList.remove("bg-blue-50");
+  });
+
+  row.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const draggedIndex = parseInt(e.dataTransfer.getData("text/plain"));
+    const targetIndex = parseInt(row.dataset.index);
+
+    const tbody = row.parentNode;
+    const rows = Array.from(tbody.children);
+    const draggedRow = rows[draggedIndex];
+
+    if (draggedRow !== row) {
+      tbody.insertBefore(draggedRow, draggedIndex < targetIndex ? row.nextSibling : row);
+      updateRowIndexes(tbody);
+    }
+
+    row.classList.remove("opacity-50", "bg-blue-50");
+  });
+
+  row.addEventListener("dragend", () => {
+    row.classList.remove("opacity-50");
+  });
+}
+
+function updateRowIndexes(tbody) {
+  Array.from(tbody.children).forEach((row, idx) => {
+    row.dataset.index = idx;
+    // Update row background color based on even/odd index
+    row.className = idx % 2 === 0 ? "bg-white" : "bg-gray-50";
+  });
+}
+
+function saveJadwal() {
+  const tbody = document.getElementById("jadwal-table");
+  
+  if (!tbody.children.length || tbody.children[0].cells.length <= 1) {
+    showNotification("Tidak ada jadwal untuk disimpan");
+    return;
+  }
+  
+  // Tampilkan loading
+  const saveButton = document.querySelector('#jadwal-section button[onclick="saveJadwal()"]');
+  const originalButtonText = saveButton.innerHTML;
+  saveButton.disabled = true;
+  saveButton.innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Menyimpan...';
+  
+  const newData = Array.from(tbody.children).map(row => {
+    if (row.cells.length <= 1) return null; // Skip empty rows
+    
+    const cells = row.querySelectorAll("td");
+    return {
+      Hari: cells[0].textContent,
+      Jam: cells[1].textContent,
+      Kelas: cells[2].textContent,
+      Guru: cells[3].textContent,
+      Minggu: cells[4].textContent
+    };
+  }).filter(item => item !== null);
+
+  if (newData.length === 0) {
+    showNotification("Tidak ada jadwal valid untuk disimpan");
+    saveButton.disabled = false;
+    saveButton.innerHTML = originalButtonText;
+    return;
+  }
+
+  console.log("Mengirim data jadwal:", newData); // Debugging
+
+  fetch(URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "updateJadwal",
+      username: loginData.username,
+      password: loginData.password,
+      data: JSON.stringify(newData)
+    })
+  })
+  .then(res => {
+    console.log("Status response:", res.status); // Debugging
+    return res.json();
+  })
+  .then(res => {
+    // Reset tombol simpan
+    saveButton.disabled = false;
+    saveButton.innerHTML = originalButtonText;
+    
+    console.log("Response dari server:", res); // Debugging
+    
+    if (res.status === "ok") {
+      showNotification("Jadwal berhasil disimpan");
+      // Reload jadwal untuk memastikan data yang ditampilkan sesuai dengan yang tersimpan
+      loadJadwal();
+    } else {
+      alert("Gagal menyimpan jadwal: " + (res.message || "Terjadi kesalahan"));
+    }
+  })
+  .catch(error => {
+    // Reset tombol simpan
+    saveButton.disabled = false;
+    saveButton.innerHTML = originalButtonText;
+    
+    console.error("Error saving jadwal (detail):", error);
+    alert("Terjadi kesalahan saat menyimpan jadwal");
+  });
+}
+
+// Tambah fungsi untuk edit jadwal
+function editJadwal(index) {
+  showJadwalForm(index);
+}
+
+// Tambah fungsi untuk hapus jadwal
+function deleteJadwal(index) {
+  if (!confirm("Yakin ingin menghapus jadwal ini?")) return;
+  
+  const tbody = document.getElementById("jadwal-table");
+  const rows = Array.from(tbody.children);
+  
+  if (index >= 0 && index < rows.length) {
+    tbody.removeChild(rows[index]);
+    updateRowIndexes(tbody);
+    showNotification("Jadwal berhasil dihapus");
+  }
+}
+
+// Tambah fungsi untuk show jadwal form yang lebih user-friendly
+function showJadwalForm(editIndex = -1) {
+  // Siapkan options untuk hari
+  const hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+  let hariOptions = hari.map(h => `<option value="${h}">${h}</option>`).join('');
+  
+  // Siapkan options untuk minggu
+  let mingguOptions = `
+    <option value="Genap">Genap</option>
+    <option value="Ganjil">Ganjil</option>
+  `;
+  
+  // Buat modal form
+  const modal = document.createElement('div');
+  modal.id = 'jadwal-form-modal';
+  modal.className = 'fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-40';
+  
+  // Nilai default jika edit
+  const defaultHari = editIndex >= 0 ? getJadwalValue(editIndex, 0) : '';
+  const defaultJam = editIndex >= 0 ? getJadwalValue(editIndex, 1) : '';
+  const defaultKelas = editIndex >= 0 ? getJadwalValue(editIndex, 2) : '';
+  const defaultGuru = editIndex >= 0 ? getJadwalValue(editIndex, 3) : '';
+  const defaultMinggu = editIndex >= 0 ? getJadwalValue(editIndex, 4) : 'Genap';
+  
+  modal.innerHTML = `
+    <div class="modal-content bg-white rounded-lg p-6 w-full max-w-md mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-semibold">${editIndex >= 0 ? 'Edit' : 'Tambah'} Jadwal</h3>
+        <button onclick="document.getElementById('jadwal-form-modal').remove()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label for="jadwal-hari" class="block text-sm font-medium text-gray-700 mb-1">Hari</label>
+          <select id="jadwal-hari" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary">
+            ${hariOptions}
+          </select>
+        </div>
+        <div>
+          <label for="jadwal-jam" class="block text-sm font-medium text-gray-700 mb-1">Jam</label>
+          <input type="text" id="jadwal-jam" placeholder="Contoh: 07:00-08:30" value="${defaultJam}" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="jadwal-kelas" class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+          <input type="text" id="jadwal-kelas" placeholder="Contoh: X IPA 1" value="${defaultKelas}" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="jadwal-guru" class="block text-sm font-medium text-gray-700 mb-1">Guru</label>
+          <input type="text" id="jadwal-guru" placeholder="Nama Guru" value="${defaultGuru}" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary" />
+        </div>
+        <div>
+          <label for="jadwal-minggu" class="block text-sm font-medium text-gray-700 mb-1">Minggu</label>
+          <select id="jadwal-minggu" class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary">
+            ${mingguOptions}
+          </select>
+        </div>
+        <div class="flex justify-end space-x-2 pt-2">
+          <button onclick="document.getElementById('jadwal-form-modal').remove()" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Batal</button>
+          <button onclick="submitJadwalForm(${editIndex})" class="btn-primary text-white px-4 py-2 rounded-md">Simpan</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Set default values for dropdowns
+  if (defaultHari) {
+    document.getElementById('jadwal-hari').value = defaultHari;
+  }
+  
+  if (defaultMinggu) {
+    document.getElementById('jadwal-minggu').value = defaultMinggu;
+  }
+}
+
+function submitJadwalForm(editIndex = -1) {
+  const hari = document.getElementById('jadwal-hari').value;
+  const jam = document.getElementById('jadwal-jam').value;
+  const kelas = document.getElementById('jadwal-kelas').value;
+  const guru = document.getElementById('jadwal-guru').value;
+  const minggu = document.getElementById('jadwal-minggu').value;
+  
+  if (!hari || !jam || !kelas || !guru) {
+    alert('Mohon lengkapi semua field yang diperlukan');
+    return;
+  }
+  
+  const tbody = document.getElementById("jadwal-table");
+  
+  // Hapus pesan "Belum ada jadwal" jika ada
+  if (tbody.children.length === 1 && tbody.children[0].cells.length === 1) {
+    tbody.innerHTML = "";
+  }
+  
+  if (editIndex >= 0) {
+    // Edit mode
+    const rows = Array.from(tbody.children);
+    if (editIndex < rows.length) {
+      const cells = rows[editIndex].querySelectorAll("td");
+      cells[0].textContent = hari;
+      cells[1].textContent = jam;
+      cells[2].textContent = kelas;
+      cells[3].textContent = guru;
+      cells[4].textContent = minggu || "Genap";
+    }
+  } else {
+    // Add mode
+    const newIndex = tbody.children.length;
+    const tr = document.createElement("tr");
+    tr.draggable = true;
+    tr.dataset.index = newIndex;
+    tr.className = newIndex % 2 === 0 ? "bg-white" : "bg-gray-50";
+    tr.innerHTML = `
+      <td class="px-4 py-2 border">${hari}</td>
+      <td class="px-4 py-2 border">${jam}</td>
+      <td class="px-4 py-2 border">${kelas}</td>
+      <td class="px-4 py-2 border">${guru}</td>
+      <td class="px-4 py-2 border">${minggu || "Genap"}</td>
+      <td class="px-4 py-2 border text-center">
+        <button onclick="editJadwal(${newIndex})" class="text-blue-500 hover:text-blue-700 mr-2">
+          <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+        </button>
+        <button onclick="deleteJadwal(${newIndex})" class="text-red-500 hover:text-red-700">
+          <svg class="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </button>
+      </td>`;
+    addDragEvents(tr);
+    tbody.appendChild(tr);
+  }
+  
+  // Hapus modal
+  document.getElementById('jadwal-form-modal').remove();
+  
+  showNotification(editIndex >= 0 ? "Jadwal berhasil diperbarui" : "Jadwal berhasil ditambahkan");
+}
+
+// Helper untuk mendapatkan nilai dari jadwal
+function getJadwalValue(index, cellIndex) {
+  const tbody = document.getElementById("jadwal-table");
+  const rows = Array.from(tbody.children);
+  
+  if (index >= 0 && index < rows.length) {
+    const cells = rows[index].querySelectorAll("td");
+    if (cellIndex < cells.length) {
+      return cells[cellIndex].textContent;
+    }
+  }
+  
+  return "";
+}

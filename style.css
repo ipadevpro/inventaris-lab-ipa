@@ -372,3 +372,35 @@ body {
     overflow-x: auto;
   }
 }
+
+/* Jurnal and Jadwal Styles */
+#jurnal-list > div {
+  transition: all 0.2s ease;
+  border-left: 4px solid var(--primary);
+}
+
+#jurnal-list > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#jadwal-table tr {
+  cursor: grab;
+  transition: all 0.2s ease;
+}
+
+#jadwal-table tr:active {
+  cursor: grabbing;
+}
+
+#jadwal-table tr:hover td {
+  background-color: rgba(79, 70, 229, 0.05);
+}
+
+#jadwal-table tr.opacity-50 {
+  opacity: 0.5;
+}
+
+#jadwal-table tr.bg-blue-50 td {
+  background-color: rgba(59, 130, 246, 0.1);
+}
