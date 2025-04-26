@@ -1,24 +1,48 @@
 /* Style untuk Inventaris Lab IPA */
 :root {
-  --primary: #4f46e5;
-  --primary-hover: #4338ca;
-  --secondary: #10b981;
-  --secondary-hover: #059669;
-  --danger: #ef4444;
-  --danger-hover: #dc2626;
-  --warning: #f59e0b;
-  --warning-hover: #d97706;
+  --color-primary: #4f46e5;
+  --color-primary-hover: #4338ca;
+  --color-secondary: #10b981;
+  --color-secondary-hover: #059669;
+  --color-danger: #ef4444;
+  --color-danger-hover: #dc2626;
+  --color-warning: #f59e0b;
+  --color-warning-hover: #d97706;
   --light: #f3f4f6;
   --dark: #1f2937;
   --gray: #9ca3af;
   --sidebar-width: 250px;
+  --primary-color: #4a6cf7;
+  --primary-hover: #3a56d4;
+  --secondary-color: #6c757d;
+  --light-bg: #f8f9fa;
+  --dark-bg: #1a1a2e;
+  --light-text: #f8f9fa;
+  --dark-text: #343a40;
+  --card-bg-light: #ffffff;
+  --card-bg-dark: #242436;
+  --border-light: #dee2e6;
+  --border-dark: #3a3a5a;
+  --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-dark: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode variables */
+html.dark {
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
 }
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f9fafb;
-  color: var(--dark);
+  background-color: var(--light-bg);
+  color: var(--dark-text);
   overflow-x: hidden;
+}
+
+html.dark body {
+  background-color: var(--dark-bg);
+  color: var(--light-text);
 }
 
 .navbar {
@@ -39,19 +63,19 @@ body {
 
 .stat-card {
   background-color: white;
-  border-left: 4px solid var(--primary);
+  border-left: 4px solid var(--color-primary);
 }
 
 .stat-card.green {
-  border-left-color: var(--secondary);
+  border-left-color: var(--color-secondary);
 }
 
 .stat-card.yellow {
-  border-left-color: var(--warning);
+  border-left-color: var(--color-warning);
 }
 
 .stat-card.red {
-  border-left-color: var(--danger);
+  border-left-color: var(--color-danger);
 }
 
 .btn {
@@ -59,35 +83,35 @@ body {
 }
 
 .btn-primary {
-  background-color: var(--primary);
+  background-color: var(--color-primary);
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-hover);
+  background-color: var(--color-primary-hover);
 }
 
 .btn-success {
-  background-color: var(--secondary);
+  background-color: var(--color-secondary);
 }
 
 .btn-success:hover {
-  background-color: var(--secondary-hover);
+  background-color: var(--color-secondary-hover);
 }
 
 .btn-warning {
-  background-color: var(--warning);
+  background-color: var(--color-warning);
 }
 
 .btn-warning:hover {
-  background-color: var(--warning-hover);
+  background-color: var(--color-warning-hover);
 }
 
 .btn-danger {
-  background-color: var(--danger);
+  background-color: var(--color-danger);
 }
 
 .btn-danger:hover {
-  background-color: var(--danger-hover);
+  background-color: var(--color-danger-hover);
 }
 
 .table-container {
@@ -123,7 +147,7 @@ body {
   position: absolute;
   width: 300px;
   height: 300px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-hover) 100%);
   border-radius: 50%;
   top: -100px;
   left: -100px;
@@ -136,7 +160,7 @@ body {
   position: absolute;
   width: 250px;
   height: 250px;
-  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-hover) 100%);
+  background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-hover) 100%);
   border-radius: 50%;
   bottom: -100px;
   right: -100px;
@@ -167,7 +191,7 @@ body {
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, var(--primary), var(--secondary), var(--primary));
+  background: linear-gradient(45deg, var(--color-primary), var(--color-secondary), var(--color-primary));
   z-index: -1;
   border-radius: 1rem;
   opacity: 0;
@@ -188,7 +212,7 @@ body {
 #login-section input:focus {
   background-color: white;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-  border-color: var(--primary);
+  border-color: var(--color-primary);
 }
 
 #login-section input:hover {
@@ -211,7 +235,7 @@ body {
   overflow: hidden;
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
-  background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
 }
 
 #login-section #login-button::before {
@@ -251,7 +275,7 @@ body {
 /* Sidebar Styles */
 .sidebar {
   width: var(--sidebar-width);
-  background-color: white;
+  background-color: var(--card-bg-light);
   height: 100vh;
   position: fixed;
   left: 0;
@@ -262,13 +286,27 @@ body {
   overflow-y: auto;
 }
 
+body.dark .sidebar {
+  background-color: var(--card-bg-dark);
+  border-right-color: var(--border-dark);
+}
+
 .sidebar-hidden {
   transform: translateX(-100%);
 }
 
 .sidebar-header {
   padding: 1.5rem 1rem;
-  border-bottom: 1px solid var(--light);
+  border-bottom: 1px solid var(--border-light);
+}
+
+body.dark .sidebar-header {
+  border-bottom-color: var(--border-dark);
+}
+
+.sidebar-header h3 {
+  font-weight: 600;
+  color: var(--primary-color);
 }
 
 .sidebar-menu {
@@ -286,8 +324,21 @@ body {
 
 .sidebar-menu-item:hover, .sidebar-menu-item.active {
   background-color: var(--light);
-  color: var(--primary);
-  border-left-color: var(--primary);
+  color: var(--color-primary);
+  border-left-color: var(--color-primary);
+}
+
+body.dark .sidebar-menu-item:hover {
+  background-color: rgba(74, 108, 247, 0.2);
+}
+
+.sidebar-menu-item.active {
+  background-color: rgba(74, 108, 247, 0.15);
+  border-left: 3px solid var(--primary-color);
+}
+
+body.dark .sidebar-menu-item.active {
+  background-color: rgba(74, 108, 247, 0.3);
 }
 
 .sidebar-menu-item svg {
@@ -376,7 +427,7 @@ body {
 /* Jurnal and Jadwal Styles */
 #jurnal-list > div {
   transition: all 0.2s ease;
-  border-left: 4px solid var(--primary);
+  border-left: 4px solid var(--color-primary);
 }
 
 #jurnal-list > div:hover {
@@ -403,4 +454,229 @@ body {
 
 #jadwal-table tr.bg-blue-50 td {
   background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Login Styles */
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--light-bg);
+}
+
+body.dark .login-container {
+  background-color: var(--dark-bg);
+}
+
+.login-card {
+  width: 400px;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: var(--shadow-light);
+  background-color: var(--card-bg-light);
+}
+
+body.dark .login-card {
+  background-color: var(--card-bg-dark);
+  box-shadow: var(--shadow-dark);
+}
+
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+  position: relative;
+}
+
+.login-header h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--primary-color);
+}
+
+.school-name {
+  font-size: 1rem;
+  color: var(--secondary-color);
+  margin-bottom: 1rem;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+
+#darkIcon, #darkIconContent {
+  display: none;
+}
+
+body.dark #darkIcon, body.dark #darkIconContent {
+  display: block;
+  color: var(--light-text);
+}
+
+body.dark #lightIcon, body.dark #lightIconContent {
+  display: none;
+}
+
+#lightIcon, #lightIconContent {
+  display: block;
+  color: var(--dark-text);
+}
+
+body.dark #lightIcon, body.dark #lightIconContent {
+  display: none;
+}
+
+.login-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-light);
+  border-radius: 5px;
+  background-color: var(--card-bg-light);
+  color: var(--dark-text);
+}
+
+body.dark .input-group input {
+  border-color: var(--border-dark);
+  background-color: var(--card-bg-dark);
+  color: var(--light-text);
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.error-message {
+  color: #dc3545;
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.loading-message {
+  color: var(--secondary-color);
+  margin-top: 1rem;
+  text-align: center;
+  display: none;
+}
+
+/* App Container Styles */
+.app-container {
+  display: flex;
+  height: 100vh;
+}
+
+/* Footer */
+.app-footer {
+  text-align: center;
+  padding: 10px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: var(--card-bg-light);
+  border-top: 1px solid var(--border-light);
+  font-size: 0.85rem;
+  color: var(--secondary-color);
+}
+
+body.dark .app-footer {
+  background-color: var(--card-bg-dark);
+  border-top-color: var(--border-dark);
+}
+
+/* Dark mode */
+body.dark {
+  background-color: var(--dark-bg);
+  color: var(--light-text);
+}
+
+/* Dark mode navbar */
+body.dark .navbar {
+  background-color: var(--card-bg-dark);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode cards */
+body.dark .card {
+  background-color: var(--card-bg-dark);
+  border-color: var(--border-dark);
+  box-shadow: var(--shadow-dark);
+}
+
+/* Dark mode inputs */
+body.dark input, 
+body.dark select, 
+body.dark textarea {
+  background-color: #2d2d44;
+  border-color: var(--border-dark);
+  color: var(--light-text);
+}
+
+body.dark input:focus,
+body.dark select:focus,
+body.dark textarea:focus {
+  background-color: #34344a;
+  border-color: var(--primary-color);
+}
+
+/* Dark mode tables */
+body.dark table {
+  background-color: var(--card-bg-dark);
+  color: var(--light-text);
+}
+
+body.dark .table-header {
+  background-color: #2a2a40;
+}
+
+body.dark tr:nth-child(even) {
+  background-color: #2d2d44;
+}
+
+/* Dark mode buttons */
+body.dark .btn-secondary {
+  background-color: #4b4b69;
+}
+
+body.dark .btn-secondary:hover {
+  background-color: #5c5c80;
+}
+
+/* Theme toggle icon visibility */
+.hidden {
+  display: none;
 }

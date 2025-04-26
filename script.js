@@ -1,9 +1,10 @@
 // Script untuk Inventaris Lab IPA
-let URL = "https://script.google.com/macros/s/AKfycbwjK8w-TE-bh7UqYSQ2OohHUoI9G6kfMaSPBBsowjUYmyfvBNG7BHRSHX0Z5fbreUbXWg/exec";
-let loginData = { username: "", password: "" };
+let URL = "https://script.google.com/macros/s/AKfycbzYH3x7h7CfuiuooB_Htniq2mq52bWNMtwscqc2ySKNc1YCH_T1uow2-ALFsHqOwjU1AQ/exec";
+let loginData = { username: "", password: "", displayName: "" };
 let inventarisData = [];
 let chartInstances = {};
 let currentSection = 'dashboard';
+let currentTheme = localStorage.getItem('theme') || 'light';
 
 // Fungsi untuk memperbarui URL API
 function updateApiUrl() {
@@ -17,6 +18,63 @@ function updateApiUrl() {
   }
 }
 
+// Function to update theme icons
+function updateThemeIcons() {
+  const darkIcon = document.getElementById('theme-toggle-dark-icon');
+  const lightIcon = document.getElementById('theme-toggle-light-icon');
+  const darkIconLogin = document.getElementById('theme-toggle-dark-icon-login');
+  const lightIconLogin = document.getElementById('theme-toggle-light-icon-login');
+  
+  if (document.body.classList.contains('dark')) {
+    // Main navbar icons
+    if (darkIcon) darkIcon.classList.add('hidden');
+    if (lightIcon) lightIcon.classList.remove('hidden');
+    
+    // Login page icons
+    if (darkIconLogin) darkIconLogin.classList.add('hidden');
+    if (lightIconLogin) lightIconLogin.classList.remove('hidden');
+  } else {
+    // Main navbar icons
+    if (darkIcon) darkIcon.classList.remove('hidden');
+    if (lightIcon) lightIcon.classList.add('hidden');
+    
+    // Login page icons
+    if (darkIconLogin) darkIconLogin.classList.remove('hidden');
+    if (lightIconLogin) lightIconLogin.classList.add('hidden');
+  }
+}
+
+// Apply saved theme on page load
+function applyTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark');
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+  } else {
+    document.body.classList.remove('dark');
+    document.documentElement.classList.add('light');
+    document.documentElement.classList.remove('dark');
+  }
+  updateThemeIcons();
+}
+
+// Theme Toggle Function
+function toggleTheme() {
+  if (document.body.classList.contains('dark')) {
+    document.body.classList.remove('dark');
+    document.documentElement.classList.remove('dark');
+    document.documentElement.classList.add('light');
+    localStorage.setItem('theme', 'light');
+  } else {
+    document.body.classList.add('dark');
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+    localStorage.setItem('theme', 'dark');
+  }
+  updateThemeIcons();
+}
+
 // Cek apakah ada URL tersimpan di localStorage
 document.addEventListener('DOMContentLoaded', function() {
   const savedUrl = localStorage.getItem("apiUrl");
@@ -25,11 +83,25 @@ document.addEventListener('DOMContentLoaded', function() {
     URL = savedUrl; // Update variable URL global
   }
   
+  // Apply saved theme on page load
+  applyTheme();
+  
+  // Add event listeners for theme toggles
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+  
+  const loginThemeToggle = document.getElementById('theme-toggle-login');
+  if (loginThemeToggle) {
+    loginThemeToggle.addEventListener('click', toggleTheme);
+  }
+  
   // Tambahkan tombol update URL di navbar
   const navbar = document.querySelector('.navbar .flex.items-center.space-x-4');
   if (navbar) {
     const updateUrlButton = document.createElement("button");
-    updateUrlButton.className = "p-2 text-gray-600 hover:text-primary";
+    updateUrlButton.className = "p-2 text-gray-600 dark:text-gray-300 hover:text-primary";
     updateUrlButton.title = "Update API URL";
     updateUrlButton.setAttribute("onclick", "updateApiUrl()");
     updateUrlButton.innerHTML = `
@@ -106,8 +178,8 @@ function login() {
   document.getElementById("login-message").textContent = "";
   
   // Tampilkan loading
-  document.getElementById("login-button").disabled = true;
-  document.getElementById("login-button").innerHTML = '<svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Loading...';
+  document.getElementById("login-button").style.display = "none";
+  document.getElementById("login-loading").classList.remove("hidden");
 
   fetch(URL, {
     method: "POST",
@@ -119,39 +191,69 @@ function login() {
   })
   .then(res => res.json())
   .then(res => {
-    // Reset tombol login
-    document.getElementById("login-button").disabled = false;
-    document.getElementById("login-button").innerHTML = 'Login';
-    
     if (res.status === "ok") {
       // Simpan data inventaris
       inventarisData = res.data;
       
-      // Sembunyikan login, tampilkan dashboard
-      document.getElementById("login-section").classList.add("hidden");
-      document.getElementById("main-content").classList.remove("hidden");
-      document.getElementById("main-content").classList.add("flex");
-      document.getElementById('sidebar').classList.remove('hidden');
-      
-      // Tampilkan pesan selamat datang
-      document.getElementById('welcome-message').textContent = `Selamat datang, Guru ${loginData.username}!`;
-      
-      // Tampilkan dashboard secara default
-      showSection('dashboard');
-      
-      // Render data
-      renderTable(res.data);
-      renderDashboardStats(res.data);
-      renderCharts(res.data);
+      // Dapatkan nama guru dari Users
+      fetchUserProfile(() => {
+        // Sembunyikan login, tampilkan dashboard
+        document.getElementById("login-section").classList.add("hidden");
+        document.getElementById("main-content").classList.remove("hidden");
+        document.getElementById("main-content").classList.add("flex");
+        document.getElementById('sidebar').classList.remove('hidden');
+        
+        // Tampilkan pesan selamat datang dengan nama guru
+        const welcomeMessage = loginData.displayName 
+          ? `Selamat datang, ${loginData.displayName}!` 
+          : `Selamat datang, ${loginData.username}!`;
+          
+        document.getElementById('welcome-message').textContent = welcomeMessage;
+        
+        // Tampilkan dashboard secara default
+        showSection('dashboard');
+        
+        // Render data
+        renderTable(res.data);
+        renderDashboardStats(res.data);
+        renderCharts(res.data);
+      });
     } else {
+      // Tampilkan pesan error
+      document.getElementById("login-button").style.display = "block";
+      document.getElementById("login-loading").classList.add("hidden");
       document.getElementById("login-message").textContent = "Login gagal! Periksa username dan password.";
     }
   })
   .catch(error => {
-    document.getElementById("login-button").disabled = false;
-    document.getElementById("login-button").innerHTML = 'Login';
+    document.getElementById("login-button").style.display = "block";
+    document.getElementById("login-loading").classList.add("hidden");
     document.getElementById("login-message").textContent = "Terjadi kesalahan. Silakan coba lagi.";
     console.error("Error:", error);
+  });
+}
+
+// Fungsi untuk mengambil profil user (nama guru)
+function fetchUserProfile(callback) {
+  fetch(URL, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "getUserProfile",
+      username: loginData.username,
+      password: loginData.password
+    })
+  })
+  .then(res => res.json())
+  .then(res => {
+    if (res.status === "ok" && res.data) {
+      loginData.displayName = res.data.Guru || loginData.username;
+    }
+  })
+  .catch(error => {
+    console.error("Error fetching user profile:", error);
+  })
+  .finally(() => {
+    if (callback) callback();
   });
 }
 
@@ -534,7 +636,7 @@ function filterTable() {
 // Fungsi untuk logout
 function logout() {
   if (confirm("Yakin ingin logout?")) {
-    loginData = { username: "", password: "" };
+    loginData = { username: "", password: "", displayName: "" };
     inventarisData = [];
     document.getElementById("login-section").classList.remove("hidden");
     document.getElementById("main-content").classList.add("hidden");
