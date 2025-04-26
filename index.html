@@ -44,10 +44,8 @@
   <div id="login-section" class="min-h-screen flex items-center justify-center p-6">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-md fade-in">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary bg-opacity-10 dark:bg-opacity-20 mb-4">
-          <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-          </svg>
+        <div class="inline-flex items-center justify-center w-20 h-20 mb-4">
+          <img src="./images/logo.png" alt="PGII Logo" class="w-full h-full object-contain">
         </div>
         <h1 class="text-3xl font-bold text-primary mb-2">Manajemen Laboratorium IPA</h1>
         <p class="text-gray-500 dark:text-gray-400">SMP PGII 1 Bandung</p>
@@ -86,18 +84,6 @@
         </div>
         <p id="login-message" class="text-red-500 text-center text-sm mt-2"></p>
       </div>
-      
-      <!-- Theme Toggle on Login Screen -->
-      <div class="mt-6 flex justify-center">
-        <button id="theme-toggle-login" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700">
-          <svg id="theme-toggle-dark-icon-login" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-          </svg>
-          <svg id="theme-toggle-light-icon-login" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
-          </svg>
-        </button>
-      </div>
     </div>
   </div>
 
@@ -105,10 +91,9 @@
   <div id="sidebar-overlay" class="overlay" onclick="toggleSidebar()"></div>
 
   <!-- Sidebar -->
-  <div id="sidebar" class="sidebar bg-white dark:bg-gray-800 shadow-lg">
+  <aside id="sidebar" class="fixed inset-y-0 left-0 bg-white dark:bg-gray-800 shadow-md z-40 transition-transform transform -translate-x-full lg:translate-x-0">
     <div class="sidebar-header">
-      <h1 class="text-xl font-bold text-primary">🧪 Manajemen Lab IPA</h1>
-      <p class="text-sm text-gray-600 dark:text-gray-400">SMP PGII 1 Bandung</p>
+      <img src="./images/logo.png" class="h-16 mb-2" alt="PGII Logo" />
       <p id="welcome-message" class="text-sm text-gray-600 dark:text-gray-400 mt-1 font-medium"></p>
     </div>
     <div class="sidebar-menu">
@@ -137,116 +122,101 @@
         Jadwal Lab
       </a>
     </div>
-  </div>
+  </aside>
 
   <!-- Main Content -->
-  <div id="main-content" class="hidden min-h-screen flex flex-col content-with-sidebar">
+  <div id="main-content">
     <!-- Navbar -->
-    <nav class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 fixed w-full z-30 left-0">
-      <div class="flex flex-wrap justify-between items-center px-4 py-2.5">
-        <div class="flex items-center">
-          <button
-            data-drawer-target="logo-sidebar"
-            data-drawer-toggle="logo-sidebar"
-            aria-controls="logo-sidebar"
-            type="button"
-            id="sidebarToggleBtn"
-            class="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-          >
-            <span class="sr-only">Toggle sidebar</span>
-            <svg class="w-6 h-6" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path clip-rule="evenodd" fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"></path>
-            </svg>
-          </button>
-          <div>
-            <a href="#" class="flex items-center ml-2 md:mr-24">
-              <img src="./images/flask.svg" class="h-8 mr-3" alt="Flask Logo" />
-              <div>
-                <span class="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap dark:text-white">Manajemen Laboratorium IPA</span>
-                <p class="text-sm text-gray-500 dark:text-gray-400">SMP PGII 1 Bandung</p>
-              </div>
-            </a>
-          </div>
-        </div>
+    <nav class="bg-white dark:bg-gray-800 shadow-sm">
+      <div class="container mx-auto px-4 flex items-center justify-between h-full">
+        <!-- Left side - Sidebar toggle and title -->
         <div class="flex items-center space-x-4">
-          <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5 mr-2">
-            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-            </svg>
-            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+          <button id="sidebar-toggle" class="lg:hidden p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
+            <svg class="w-6 h-6 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
             </svg>
           </button>
-          <button id="refresh-button" onclick="refreshData()" class="p-2 text-gray-600 dark:text-gray-300 hover:text-primary" title="Refresh Data">
+          <h1 class="text-xl font-semibold text-gray-800 dark:text-white">Manajemen Laboratorium IPA SMP PGII 1 Bandung</h1>
+        </div>
+        
+        <!-- Right side - Theme toggle & user menu -->
+        <div class="flex items-center">
+          <button id="theme-toggle" class="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none transition-colors duration-200">
+            <!-- Sun icon for dark mode -->
+            <svg class="w-6 h-6 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+            </svg>
+            <!-- Moon icon for light mode -->
+            <svg class="w-6 h-6 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+            </svg>
+          </button>
+          
+          <!-- Logout button -->
+          <button onclick="logout()" class="ml-4 p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none transition-colors duration-200">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-          </button>
-          <button onclick="logout()" class="flex items-center text-sm text-gray-600 dark:text-gray-300 hover:text-primary">
-            <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
             </svg>
-            Logout
           </button>
         </div>
       </div>
     </nav>
 
-    <!-- Content Container -->
-    <div class="max-w-7xl mx-auto p-4 md:p-6 flex-grow">
+    <!-- Page Content -->
+    <div class="container mx-auto px-4 py-6">
       <!-- Dashboard Section -->
       <section id="dashboard-section" class="space-y-6">
         <!-- Dashboard Stats -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 stats-grid">
-          <div class="stat-card p-4 rounded-lg bg-white dark:bg-gray-800">
+          <div class="stat-card p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
             <div class="flex items-center">
-              <div class="p-3 rounded-full bg-primary bg-opacity-10 dark:bg-opacity-30 mr-4">
-                <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+              <div class="circle-icon bg-indigo-100 text-indigo-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                 </svg>
               </div>
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Total Barang</p>
-                <h3 id="total-barang" class="text-2xl font-bold">0</h3>
+              <div class="ml-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Barang</p>
+                <h3 id="total-barang" class="text-3xl font-bold">0</h3>
               </div>
             </div>
           </div>
-          <div class="stat-card green p-4 rounded-lg bg-white dark:bg-gray-800">
+          <div class="stat-card p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
             <div class="flex items-center">
-              <div class="p-3 rounded-full bg-secondary bg-opacity-10 dark:bg-opacity-30 mr-4">
-                <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
+              <div class="circle-icon bg-green-100 text-green-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>
               </div>
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Total Jumlah</p>
-                <h3 id="total-jumlah" class="text-2xl font-bold">0</h3>
+              <div class="ml-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Total Jumlah</p>
+                <h3 id="total-jumlah" class="text-3xl font-bold">0</h3>
               </div>
             </div>
           </div>
-          <div class="stat-card yellow p-4 rounded-lg bg-white dark:bg-gray-800">
+          <div class="stat-card p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
             <div class="flex items-center">
-              <div class="p-3 rounded-full bg-warning bg-opacity-10 dark:bg-opacity-30 mr-4">
-                <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              <div class="circle-icon bg-orange-100 text-orange-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
                 </svg>
               </div>
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Rusak Ringan</p>
-                <h3 id="kondisi-rusak-ringan" class="text-2xl font-bold">0</h3>
+              <div class="ml-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Rusak Ringan</p>
+                <h3 id="kondisi-rusak-ringan" class="text-3xl font-bold">0</h3>
               </div>
             </div>
           </div>
-          <div class="stat-card red p-4 rounded-lg bg-white dark:bg-gray-800">
+          <div class="stat-card p-4 rounded-lg bg-white dark:bg-gray-800 shadow-sm">
             <div class="flex items-center">
-              <div class="p-3 rounded-full bg-danger bg-opacity-10 dark:bg-opacity-30 mr-4">
-                <svg class="w-6 h-6 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              <div class="circle-icon bg-red-100 text-red-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
               </div>
-              <div>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Rusak Berat</p>
-                <h3 id="kondisi-rusak" class="text-2xl font-bold">0</h3>
+              <div class="ml-4">
+                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">Rusak Berat</p>
+                <h3 id="kondisi-rusak" class="text-3xl font-bold">0</h3>
               </div>
             </div>
           </div>
@@ -397,8 +367,8 @@
     
     <!-- Footer -->
     <footer class="bg-white dark:bg-gray-800 border-t dark:border-gray-700 p-4 text-center text-sm text-gray-600 dark:text-gray-400">
-      <p>Developed by Devi Saidulloh, S.Pd. with coffee ☕</p>
-      <p class="text-xs mt-1">&copy; 2023 SMP PGII 1 Bandung</p>
+      <p>Developed by Devi Saidulloh, S.Pd. with ☕</p>
+      <p class="text-xs mt-1">&copy; 2025 SMP PGII 1 Bandung</p>
     </footer>
   </div>
 

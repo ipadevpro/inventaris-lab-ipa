@@ -18,61 +18,76 @@ function updateApiUrl() {
   }
 }
 
-// Function to update theme icons
+// Update theme icons
 function updateThemeIcons() {
-  const darkIcon = document.getElementById('theme-toggle-dark-icon');
-  const lightIcon = document.getElementById('theme-toggle-light-icon');
-  const darkIconLogin = document.getElementById('theme-toggle-dark-icon-login');
-  const lightIconLogin = document.getElementById('theme-toggle-light-icon-login');
+  // Main theme toggle icons
+  const darkIcon = document.querySelector('#theme-toggle svg.dark\\:block');
+  const lightIcon = document.querySelector('#theme-toggle svg.block.dark\\:hidden');
   
-  if (document.body.classList.contains('dark')) {
-    // Main navbar icons
-    if (darkIcon) darkIcon.classList.add('hidden');
-    if (lightIcon) lightIcon.classList.remove('hidden');
-    
-    // Login page icons
-    if (darkIconLogin) darkIconLogin.classList.add('hidden');
-    if (lightIconLogin) lightIconLogin.classList.remove('hidden');
-  } else {
-    // Main navbar icons
-    if (darkIcon) darkIcon.classList.remove('hidden');
-    if (lightIcon) lightIcon.classList.add('hidden');
-    
-    // Login page icons
-    if (darkIconLogin) darkIconLogin.classList.remove('hidden');
-    if (lightIconLogin) lightIconLogin.classList.add('hidden');
+  const isDarkMode = document.documentElement.classList.contains('dark');
+  
+  // Update main navbar icons
+  if (darkIcon && lightIcon) {
+    darkIcon.classList.toggle('hidden', !isDarkMode);
+    lightIcon.classList.toggle('hidden', isDarkMode);
   }
+}
+
+// Check if theme needs to be set based on system preference
+function checkSystemThemePreference() {
+  // If theme is not saved in localStorage, check system preference
+  if (!localStorage.getItem('theme')) {
+    const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = prefersDarkMode ? 'dark' : 'light';
+    localStorage.setItem('theme', theme);
+    return theme;
+  }
+  // Otherwise return saved theme
+  return localStorage.getItem('theme');
 }
 
 // Apply saved theme on page load
 function applyTheme() {
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'dark') {
-    document.body.classList.add('dark');
-    document.documentElement.classList.add('dark');
-    document.documentElement.classList.remove('light');
-  } else {
-    document.body.classList.remove('dark');
-    document.documentElement.classList.add('light');
-    document.documentElement.classList.remove('dark');
-  }
+  const savedTheme = checkSystemThemePreference();
+  
+  // Apply to root HTML element
+  document.documentElement.classList.remove('light', 'dark');
+  document.documentElement.classList.add(savedTheme);
+  
+  // Apply to body for compatibility
+  document.body.classList.toggle('dark', savedTheme === 'dark');
+  
+  // Update the icons
   updateThemeIcons();
+  
+  // Update current theme variable
+  currentTheme = savedTheme;
+  
+  console.log('Theme applied:', savedTheme);
 }
 
 // Theme Toggle Function
 function toggleTheme() {
-  if (document.body.classList.contains('dark')) {
-    document.body.classList.remove('dark');
-    document.documentElement.classList.remove('dark');
-    document.documentElement.classList.add('light');
-    localStorage.setItem('theme', 'light');
-  } else {
-    document.body.classList.add('dark');
-    document.documentElement.classList.add('dark');
-    document.documentElement.classList.remove('light');
-    localStorage.setItem('theme', 'dark');
-  }
+  const isDarkMode = document.documentElement.classList.contains('dark');
+  const newTheme = isDarkMode ? 'light' : 'dark';
+  
+  // Update root HTML element
+  document.documentElement.classList.remove('light', 'dark');
+  document.documentElement.classList.add(newTheme);
+  
+  // Update body for compatibility
+  document.body.classList.toggle('dark', newTheme === 'dark');
+  
+  // Save to localStorage
+  localStorage.setItem('theme', newTheme);
+  
+  // Update icons
   updateThemeIcons();
+  
+  // Update current theme variable
+  currentTheme = newTheme;
+  
+  console.log('Theme toggled to:', newTheme);
 }
 
 // Cek apakah ada URL tersimpan di localStorage
@@ -83,18 +98,30 @@ document.addEventListener('DOMContentLoaded', function() {
     URL = savedUrl; // Update variable URL global
   }
   
-  // Apply saved theme on page load
+  // Apply saved theme or default to light
   applyTheme();
   
-  // Add event listeners for theme toggles
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
-  }
+  // Listen for storage events to sync theme across tabs
+  window.addEventListener('storage', function(event) {
+    if (event.key === 'theme') {
+      applyTheme();
+    }
+  });
   
-  const loginThemeToggle = document.getElementById('theme-toggle-login');
-  if (loginThemeToggle) {
-    loginThemeToggle.addEventListener('click', toggleTheme);
+  // Also listen for system preference changes
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+    // Only apply if user hasn't explicitly set a preference
+    if (!localStorage.getItem('theme')) {
+      const newTheme = e.matches ? 'dark' : 'light';
+      localStorage.setItem('theme', newTheme);
+      applyTheme();
+    }
+  });
+  
+  // Add event listeners for theme toggles
+  const mainThemeToggle = document.getElementById('theme-toggle');
+  if (mainThemeToggle) {
+    mainThemeToggle.addEventListener('click', toggleTheme);
   }
   
   // Tambahkan tombol update URL di navbar
@@ -113,12 +140,38 @@ document.addEventListener('DOMContentLoaded', function() {
     navbar.insertBefore(updateUrlButton, navbar.firstChild);
   }
   
-  document.getElementById('sidebar').classList.add('hidden');
-});
-
-// Sembunyikan sidebar saat halaman dimuat
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('sidebar').classList.add('hidden');
+  // Setup sidebar toggle button click event
+  const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+  if (sidebarToggleBtn) {
+    sidebarToggleBtn.addEventListener('click', toggleSidebar);
+  }
+  
+  // Set up event listeners for sidebar menu items
+  document.querySelectorAll('.sidebar-menu-item').forEach(item => {
+    item.addEventListener('click', function(e) {
+      const section = this.getAttribute('href').replace('#', '');
+      showSection(section);
+      e.preventDefault();
+    });
+  });
+  
+  // Hide sidebar and main content when login section is visible
+  const loginSection = document.getElementById('login-section');
+  const sidebar = document.getElementById('sidebar');
+  const mainContent = document.getElementById('main-content');
+  
+  if (loginSection && sidebar && mainContent) {
+    if (!loginSection.classList.contains('hidden')) {
+      // We're at the login screen, hide sidebar and main content
+      sidebar.classList.add('hidden');
+      mainContent.classList.add('hidden');
+    } else {
+      // Already logged in, show sidebar and main content
+      sidebar.classList.remove('hidden');
+      mainContent.classList.remove('hidden');
+      mainContent.classList.add('flex');
+    }
+  }
 });
 
 // Fungsi untuk toggle sidebar
@@ -126,49 +179,60 @@ function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('sidebar-overlay');
   
-  sidebar.classList.toggle('sidebar-visible');
-  overlay.classList.toggle('overlay-visible');
+  if (sidebar && overlay) {
+    // Toggle the transform property to show/hide sidebar
+    sidebar.classList.toggle('-translate-x-full');
+    sidebar.classList.toggle('translate-x-0');
+    
+    // Also toggle visibility on the overlay
+    overlay.classList.toggle('overlay-visible');
+  }
 }
 
 // Fungsi untuk menampilkan section
 function showSection(section) {
-  // Update active menu item
-  document.querySelectorAll('.sidebar-menu-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  document.querySelector(`.sidebar-menu-item[href="#${section}"]`).classList.add('active');
-  
-  // Hide all sections
-  document.getElementById('dashboard-section').classList.add('hidden');
-  document.getElementById('inventaris-section').classList.add('hidden');
-  document.getElementById('jurnal-section').classList.add('hidden');
-  document.getElementById('jadwal-section').classList.add('hidden');
-  
-  // Show selected section
-  document.getElementById(`${section}-section`).classList.remove('hidden');
-  
-  // Update page title
-  let title = 'Dashboard';
-  if (section === 'inventaris') title = 'Daftar Inventaris';
-  if (section === 'jurnal') title = 'Jurnal Pelaksanaan Lab';
-  if (section === 'jadwal') title = 'Jadwal Penggunaan Lab';
-  document.getElementById('page-title').textContent = title;
-  
-  // Close sidebar on mobile
-  if (window.innerWidth < 1024) {
-    toggleSidebar();
+  try {
+    // Update active menu item
+    document.querySelectorAll('.sidebar-menu-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    
+    const activeMenuItem = document.querySelector(`.sidebar-menu-item[href="#${section}"]`);
+    if (activeMenuItem) {
+      activeMenuItem.classList.add('active');
+    }
+    
+    // Hide all sections
+    document.getElementById('dashboard-section')?.classList.add('hidden');
+    document.getElementById('inventaris-section')?.classList.add('hidden');
+    document.getElementById('jurnal-section')?.classList.add('hidden');
+    document.getElementById('jadwal-section')?.classList.add('hidden');
+    
+    // Show selected section
+    const selectedSection = document.getElementById(`${section}-section`);
+    if (selectedSection) {
+      selectedSection.classList.remove('hidden');
+    }
+    
+    // Update current section
+    currentSection = section;
+    
+    // Load section specific data
+    if (section === 'dashboard') {
+      renderDashboardStats(inventarisData);
+      renderCharts(inventarisData);
+    }
+    if (section === 'inventaris') renderTable(inventarisData);
+    if (section === 'jurnal') loadJurnal();
+    if (section === 'jadwal') loadJadwal();
+    
+    // Close sidebar on mobile
+    if (window.innerWidth < 1024) {
+      toggleSidebar();
+    }
+  } catch (error) {
+    console.error("Error showing section:", error);
   }
-  
-  currentSection = section;
-  
-  // Load section specific data
-  if (section === 'dashboard') {
-    renderDashboardStats(inventarisData);
-    renderCharts(inventarisData);
-  }
-  if (section === 'inventaris') renderTable(inventarisData);
-  if (section === 'jurnal') loadJurnal();
-  if (section === 'jadwal') loadJadwal();
 }
 
 // Fungsi untuk login
@@ -199,9 +263,15 @@ function login() {
       fetchUserProfile(() => {
         // Sembunyikan login, tampilkan dashboard
         document.getElementById("login-section").classList.add("hidden");
-        document.getElementById("main-content").classList.remove("hidden");
-        document.getElementById("main-content").classList.add("flex");
-        document.getElementById('sidebar').classList.remove('hidden');
+        
+        // Show the sidebar and main content
+        const sidebar = document.getElementById("sidebar");
+        const mainContent = document.getElementById("main-content");
+        if (sidebar) sidebar.classList.remove('hidden');
+        if (mainContent) {
+          mainContent.classList.remove("hidden");
+          mainContent.classList.add("flex");
+        }
         
         // Tampilkan pesan selamat datang dengan nama guru
         const welcomeMessage = loginData.displayName 
@@ -347,134 +417,186 @@ function getKondisiClass(kondisi) {
 
 // Fungsi untuk render statistik dashboard
 function renderDashboardStats(data) {
-  // Total barang
-  const totalBarang = data.length;
-  document.getElementById("total-barang").textContent = totalBarang;
-  
-  // Total jumlah
-  const totalJumlah = data.reduce((total, item) => {
-    return total + (parseInt(item["Jumlah"]) || 0);
-  }, 0);
-  document.getElementById("total-jumlah").textContent = totalJumlah;
-  
-  // Kondisi barang
-  const kondisiBaik = data.filter(item => item["Kondisi"].toLowerCase().includes('baik')).length;
-  const kondisiRusakRingan = data.filter(item => item["Kondisi"].toLowerCase().includes('rusak ringan')).length;
-  const kondisiRusak = data.filter(item => item["Kondisi"].toLowerCase().includes('rusak') && !item["Kondisi"].toLowerCase().includes('ringan')).length;
-  
-  document.getElementById("kondisi-baik").textContent = kondisiBaik;
-  document.getElementById("kondisi-rusak-ringan").textContent = kondisiRusakRingan;
-  document.getElementById("kondisi-rusak").textContent = kondisiRusak;
-  
-  // Kategori
-  const kategoriCount = {};
-  data.forEach(item => {
-    const kategori = item["Kategori"];
-    if (kategori) {
-      kategoriCount[kategori] = (kategoriCount[kategori] || 0) + 1;
-    }
-  });
-  
-  // Tampilkan 5 kategori teratas
-  const kategoriList = document.getElementById("kategori-list");
-  kategoriList.innerHTML = "";
-  
-  Object.entries(kategoriCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .forEach(([kategori, count]) => {
-      const li = document.createElement("li");
-      li.className = "flex justify-between items-center py-2 border-b";
-      li.innerHTML = `
-        <span class="text-sm font-medium">${kategori}</span>
-        <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${count}</span>
-      `;
-      kategoriList.appendChild(li);
+  // Check if data exists and is an array
+  if (!Array.isArray(data) || data.length === 0) {
+    console.warn("No data available for dashboard stats");
+    document.getElementById("total-barang").textContent = "0";
+    document.getElementById("total-jumlah").textContent = "0";
+    document.getElementById("kondisi-baik").textContent = "0";
+    document.getElementById("kondisi-rusak-ringan").textContent = "0";
+    document.getElementById("kondisi-rusak").textContent = "0";
+    document.getElementById("kondisi-rusak-ringan-chart").textContent = "0";
+    document.getElementById("kondisi-rusak-chart").textContent = "0";
+    document.getElementById("kategori-list").innerHTML = "<li class='p-3 text-center text-gray-500'>Tidak ada data</li>";
+    return;
+  }
+
+  try {
+    // Total barang
+    const totalBarang = data.length;
+    document.getElementById("total-barang").textContent = totalBarang;
+    
+    // Total jumlah
+    const totalJumlah = data.reduce((total, item) => {
+      return total + (parseInt(item["Jumlah"]) || 0);
+    }, 0);
+    document.getElementById("total-jumlah").textContent = totalJumlah;
+    
+    // Kondisi barang
+    const kondisiBaik = data.filter(item => item["Kondisi"] && item["Kondisi"].toLowerCase().includes('baik')).length;
+    const kondisiRusakRingan = data.filter(item => item["Kondisi"] && item["Kondisi"].toLowerCase().includes('rusak ringan')).length;
+    const kondisiRusak = data.filter(item => item["Kondisi"] && item["Kondisi"].toLowerCase().includes('rusak') && !item["Kondisi"].toLowerCase().includes('ringan')).length;
+    
+    document.getElementById("kondisi-baik").textContent = kondisiBaik;
+    document.getElementById("kondisi-rusak-ringan").textContent = kondisiRusakRingan;
+    document.getElementById("kondisi-rusak").textContent = kondisiRusak;
+    document.getElementById("kondisi-rusak-ringan-chart").textContent = kondisiRusakRingan;
+    document.getElementById("kondisi-rusak-chart").textContent = kondisiRusak;
+    
+    // Kategori
+    const kategoriCount = {};
+    data.forEach(item => {
+      const kategori = item["Kategori"];
+      if (kategori) {
+        kategoriCount[kategori] = (kategoriCount[kategori] || 0) + 1;
+      }
     });
+    
+    // Tampilkan 5 kategori teratas
+    const kategoriList = document.getElementById("kategori-list");
+    kategoriList.innerHTML = "";
+    
+    const sortedKategori = Object.entries(kategoriCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    if (sortedKategori.length === 0) {
+      kategoriList.innerHTML = "<li class='p-3 text-center text-gray-500'>Tidak ada data kategori</li>";
+    } else {
+      sortedKategori.forEach(([kategori, count]) => {
+        const li = document.createElement("li");
+        li.className = "flex justify-between items-center py-2 border-b";
+        li.innerHTML = `
+          <span class="text-sm font-medium">${kategori}</span>
+          <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">${count}</span>
+        `;
+        kategoriList.appendChild(li);
+      });
+    }
+  } catch (error) {
+    console.error("Error rendering dashboard stats:", error);
+  }
 }
 
 // Fungsi untuk render charts
 function renderCharts(data) {
-  // Destroy existing charts to prevent duplicates
-  Object.values(chartInstances).forEach(chart => chart.destroy());
-  chartInstances = {};
-  
-  // Chart kondisi
-  const kondisiBaik = data.filter(item => item["Kondisi"].toLowerCase().includes('baik')).length;
-  const kondisiRusakRingan = data.filter(item => item["Kondisi"].toLowerCase().includes('rusak ringan')).length;
-  const kondisiRusak = data.filter(item => item["Kondisi"].toLowerCase().includes('rusak') && !item["Kondisi"].toLowerCase().includes('ringan')).length;
-  
-  const ctxKondisi = document.getElementById('chart-kondisi').getContext('2d');
-  chartInstances.kondisi = new Chart(ctxKondisi, {
-    type: 'doughnut',
-    data: {
-      labels: ['Baik', 'Rusak Ringan', 'Rusak Berat'],
-      datasets: [{
-        data: [kondisiBaik, kondisiRusakRingan, kondisiRusak],
-        backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            boxWidth: 12,
-            padding: 15
-          }
-        }
-      },
-      cutout: '70%'
+  try {
+    // Ensure Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+      console.error("Chart.js is not loaded");
+      return;
     }
-  });
-  
-  // Chart kategori
-  const kategoriData = {};
-  data.forEach(item => {
-    const kategori = item["Kategori"];
-    if (kategori) {
-      kategoriData[kategori] = (kategoriData[kategori] || 0) + 1;
+
+    // Check if data exists and is an array
+    if (!Array.isArray(data) || data.length === 0) {
+      console.warn("No data available for charts");
+      return;
     }
-  });
-  
-  // Ambil 5 kategori teratas
-  const topKategori = Object.entries(kategoriData)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-  
-  const ctxKategori = document.getElementById('chart-kategori').getContext('2d');
-  chartInstances.kategori = new Chart(ctxKategori, {
-    type: 'bar',
-    data: {
-      labels: topKategori.map(k => k[0]),
-      datasets: [{
-        label: 'Jumlah Barang',
-        data: topKategori.map(k => k[1]),
-        backgroundColor: '#4f46e5',
-        borderRadius: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
+
+    // Initialize chartInstances if not defined
+    if (typeof chartInstances === 'undefined') {
+      window.chartInstances = {};
+    }
+    
+    // Destroy existing charts to prevent duplicates
+    if (chartInstances.kondisi) chartInstances.kondisi.destroy();
+    if (chartInstances.kategori) chartInstances.kategori.destroy();
+    
+    // Chart kondisi
+    const kondisiBaik = data.filter(item => item["Kondisi"] && item["Kondisi"].toLowerCase().includes('baik')).length;
+    const kondisiRusakRingan = data.filter(item => item["Kondisi"] && item["Kondisi"].toLowerCase().includes('rusak ringan')).length;
+    const kondisiRusak = data.filter(item => item["Kondisi"] && item["Kondisi"].toLowerCase().includes('rusak') && !item["Kondisi"].toLowerCase().includes('ringan')).length;
+    
+    const ctxKondisiElement = document.getElementById('chart-kondisi');
+    if (ctxKondisiElement) {
+      const ctxKondisi = ctxKondisiElement.getContext('2d');
+      chartInstances.kondisi = new Chart(ctxKondisi, {
+        type: 'doughnut',
+        data: {
+          labels: ['Baik', 'Rusak Ringan', 'Rusak Berat'],
+          datasets: [{
+            data: [kondisiBaik, kondisiRusakRingan, kondisiRusak],
+            backgroundColor: ['#10b981', '#f59e0b', '#ef4444'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                padding: 15
+              }
+            }
+          },
+          cutout: '70%'
         }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: {
-            precision: 0
-          }
-        }
+      });
+    }
+    
+    // Chart kategori
+    const kategoriData = {};
+    data.forEach(item => {
+      const kategori = item["Kategori"];
+      if (kategori) {
+        kategoriData[kategori] = (kategoriData[kategori] || 0) + 1;
       }
+    });
+    
+    // Ambil 5 kategori teratas
+    const topKategori = Object.entries(kategoriData)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+    
+    const ctxKategoriElement = document.getElementById('chart-kategori');
+    if (ctxKategoriElement && topKategori.length > 0) {
+      const ctxKategori = ctxKategoriElement.getContext('2d');
+      chartInstances.kategori = new Chart(ctxKategori, {
+        type: 'bar',
+        data: {
+          labels: topKategori.map(k => k[0]),
+          datasets: [{
+            label: 'Jumlah Barang',
+            data: topKategori.map(k => k[1]),
+            backgroundColor: '#4f46e5',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0
+              }
+            }
+          }
+        }
+      });
     }
-  });
+  } catch (error) {
+    console.error("Error rendering charts:", error);
+  }
 }
 
 // Fungsi untuk menampilkan form
@@ -635,14 +757,33 @@ function filterTable() {
 
 // Fungsi untuk logout
 function logout() {
-  if (confirm("Yakin ingin logout?")) {
-    loginData = { username: "", password: "", displayName: "" };
-    inventarisData = [];
-    document.getElementById("login-section").classList.remove("hidden");
-    document.getElementById("main-content").classList.add("hidden");
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
+  // Reset data
+  loginData = { username: "", password: "", displayName: "" };
+  inventarisData = [];
+  
+  // Reset UI - hide sidebar and main content, show login
+  const loginSection = document.getElementById("login-section");
+  const sidebar = document.getElementById("sidebar");
+  const mainContent = document.getElementById("main-content");
+  
+  if (loginSection) loginSection.classList.remove("hidden");
+  if (sidebar) sidebar.classList.add("hidden");
+  if (mainContent) {
+    mainContent.classList.add("hidden");
+    mainContent.classList.remove("flex");
   }
+  
+  // Clear input fields
+  document.getElementById("username").value = "";
+  document.getElementById("password").value = "";
+  document.getElementById("login-message").textContent = "";
+  document.getElementById("login-button").style.display = "block";
+  document.getElementById("login-loading").classList.add("hidden");
+  
+  // Reset charts to prevent errors
+  if (chartInstances.kondisi) chartInstances.kondisi.destroy();
+  if (chartInstances.kategori) chartInstances.kategori.destroy();
+  chartInstances = {};
 }
 
 // Event listener untuk search input
